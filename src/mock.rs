@@ -1,4 +1,3 @@
-
 pub struct MockScreenCapture {
     files: Vec<std::path::PathBuf>,
     index: usize,
@@ -15,12 +14,7 @@ impl MockScreenCapture {
         }
 
         files.sort();
-        Ok(
-            MockScreenCapture {
-                files,
-                index: 0
-            }
-        )
+        Ok(MockScreenCapture { files, index: 0 })
     }
 
     pub fn next_frame(&mut self) -> Result<image::RgbaImage, crate::Error> {
@@ -30,4 +24,3 @@ impl MockScreenCapture {
         Ok(orig_image)
     }
 }
-

@@ -1,4 +1,3 @@
-
 /// Struct to represent a rectangle.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Rect {
