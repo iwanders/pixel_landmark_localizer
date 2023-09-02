@@ -140,14 +140,17 @@ pub fn main_blocks() -> Result<(), Error> {
     let image_path = std::path::PathBuf::from("../screenshots/Screenshot400.png");
     let s1 = image::open(&image_path)?.to_rgba8();
 
+
     let block = Rect {
         x: 135,
         y: 742,
-        w: 32,
-        h: 32,
+        w: 16,
+        h: 16,
     };
     let Rect { x, y, w, h } = block;
     let block_roi = s0.view(x, y, w, h);
+
+    block_roi.to_image().save("/tmp/block_image.png")?;
 
     fn score(a: &RgbaSubImage, b: &RgbaSubImage) -> u32 {
         // let mut score = 0;
@@ -201,6 +204,8 @@ pub fn main_blocks() -> Result<(), Error> {
         0
     }
 
+    let start = std::time::Instant::now();
+
     let best = find_match(
         &block_roi,
         &s1,
@@ -208,7 +213,7 @@ pub fn main_blocks() -> Result<(), Error> {
         (-100, 100),
         (-100, 100),
     );
-    println!("best: {best:?}");
+    println!("best: {best:?}, took {}", start.elapsed().as_secs_f64());
 
     Ok(())
 }
@@ -235,5 +240,59 @@ pub fn main() -> Result<(), Error> {
         println!("i: {i:?} delta: {delta:?}  pos: {:?}", odom.position());
     }
 
+    Ok(())
+}
+
+
+
+pub fn main_histogram() -> Result<(), Error> {
+    use image::GenericImageView;
+    type RgbaSubImage<'a> = image::SubImage<&'a image::ImageBuffer<image::Rgba<u8>, Vec<u8>>>;
+
+    let image_path = std::path::PathBuf::from("../screenshots/Screenshot418.png");
+    let s0 = image::open(&image_path)?.to_rgba8();
+    let image_path = std::path::PathBuf::from("../screenshots/Screenshot419.png");
+    let s1 = image::open(&image_path)?.to_rgba8();
+
+    let roi = util::Rect {
+        x: 492,
+        y: 110,
+        w: 1416,
+        h: 742,
+    };
+
+    let Rect { x, y, w, h } = roi;
+
+    let s0_block_roi = s0.view(x, y, w, h);
+    s0_block_roi.to_image().save("/tmp/s0_block_image.png")?;
+
+    let s1_block_roi = s1.view(x, y, w, h);
+    s1_block_roi.to_image().save("/tmp/s1_block_image.png")?;
+
+
+    fn histogram(a: &RgbaSubImage) -> (Vec<u32>, Vec<u32>)  {
+        let start = std::time::Instant::now();
+        let mut hist_y = vec![0u32; a.width() as usize];
+        let mut hist_x = vec![0u32; a.height() as usize];
+        for iy in 0..a.height() {
+            for ix in 0..a.width() {
+                let value = a.get_pixel(ix as u32, iy as u32).0[0] as u32;
+                hist_y[ix as usize] += value;
+                hist_x[iy as usize] += value;
+            }
+        }
+        
+        println!("took {}", start.elapsed().as_secs_f64());
+        (hist_x, hist_y)
+    }
+
+
+    let (s0_x, s0_y) = histogram(&s0_block_roi);
+    let (s1_x, s1_y) = histogram(&s1_block_roi);
+
+    println!("s0_x {s0_x:?}");
+    println!("s0_y {s0_y:?}");
+
+    
     Ok(())
 }
