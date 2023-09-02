@@ -293,6 +293,52 @@ pub fn main_histogram() -> Result<(), Error> {
     println!("s0_x {s0_x:?}");
     println!("s0_y {s0_y:?}");
 
+    fn best_cross_correlation(a: &[u32], b: &[u32]) -> (isize, u64) {
+        let left_lag = -(b.len() as isize - 1);
+        let right_lag = a.len() as isize;
+        // let result_size = right_lag - left_lag + 1;
+        let mut correlations = vec![];
+
+        for lag in left_lag..right_lag {
+            let start = lag.max(0);
+            let end = a.len().min((b.len() as isize + lag) as usize);
+            let mut s: u64 = 0;
+            for i in start as usize..end as usize {
+                s += (a[i] * b[i - lag as usize]) as u64;
+            }
+            correlations.push((lag, s / ((end as usize - start as usize) as u64)));
+            // correlations.push((lag, s));
+        }
+        println!("correlations: {correlations:?}");
+
+        let mut best_score = (0, 0);
+        for i in 0..correlations.len() {
+            let (lag, s) = correlations[i];
+            if (s > best_score.1) {
+                best_score = (lag, s);
+            }
+        }
+        best_score
+    }
+
+    let best_corr_x = best_cross_correlation(&s0_x, &s1_x);
+    println!("best_corr_x {best_corr_x:?}");
+    let best_corr_y = best_cross_correlation(&s0_y, &s1_y);
+    println!("best_corr_y {best_corr_y:?}");
+
+    fn combine_images(a: &RgbaSubImage, b: &RgbaSubImage, offsets: (i32, i32)) -> image::RgbaImage {
+        use image::GenericImage;
+        let combined_w = a.width() + b.width() * 2;
+        let combined_h = a.height() + b.height() * 2;
+        println!("offsets: {offsets:?}");
+        let mut img = image::RgbaImage::new(combined_w, combined_h);
+        img.copy_from(&b.to_image(), a.width(), a.height()).unwrap();
+        img.copy_from(&a.to_image(), (a.width() as i32  + offsets.0) as u32, (a.height() as i32  + offsets.1) as u32).unwrap();
+        img
+    }
+
+    let c = combine_images(&s0_block_roi, &s1_block_roi, (best_corr_x.0 as i32, best_corr_y.0 as i32));
+    c.save("/tmp/combined_c.png")?;
     
     Ok(())
 }
