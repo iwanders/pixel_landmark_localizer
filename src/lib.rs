@@ -249,9 +249,9 @@ pub fn main_histogram() -> Result<(), Error> {
     use image::GenericImageView;
     type RgbaSubImage<'a> = image::SubImage<&'a image::ImageBuffer<image::Rgba<u8>, Vec<u8>>>;
 
-    let image_path = std::path::PathBuf::from("../screenshots/Screenshot418.png");
+    let image_path = std::path::PathBuf::from("../screenshots/Screenshot399.png");
     let s0 = image::open(&image_path)?.to_rgba8();
-    let image_path = std::path::PathBuf::from("../screenshots/Screenshot419.png");
+    let image_path = std::path::PathBuf::from("../screenshots/Screenshot400.png");
     let s1 = image::open(&image_path)?.to_rgba8();
 
     let roi = util::Rect {
@@ -276,7 +276,7 @@ pub fn main_histogram() -> Result<(), Error> {
         let mut hist_x = vec![0u32; a.height() as usize];
         for iy in 0..a.height() {
             for ix in 0..a.width() {
-                let value = a.get_pixel(ix as u32, iy as u32).0[0] as u32;
+                let value = a.get_pixel(ix as u32, iy as u32).0[1] as u32;
                 hist_y[ix as usize] += value;
                 hist_x[iy as usize] += value;
             }
@@ -304,26 +304,30 @@ pub fn main_histogram() -> Result<(), Error> {
             let end = a.len().min((b.len() as isize + lag) as usize);
             let mut s: u64 = 0;
             for i in start as usize..end as usize {
-                s += (a[i] * b[i - lag as usize]) as u64;
+                // s += (a[i] * b[i - lag as usize]) as u64;
+                s += (a[i] as i32 - b[i - lag as usize] as i32).abs() as u64;
             }
             correlations.push((lag, s / ((end as usize - start as usize) as u64)));
             // correlations.push((lag, s));
         }
         println!("correlations: {correlations:?}");
 
-        let mut best_score = (0, 0);
+        let mut best_score = (0, 199999999);
+        // let mut best_score = (0, 0);
         for i in 0..correlations.len() {
             let (lag, s) = correlations[i];
-            if (s > best_score.1) {
+            if s < best_score.1 {
+            // if s > best_score.1 {
                 best_score = (lag, s);
             }
         }
         best_score
+        // (0, 0)
     }
 
-    let best_corr_x = best_cross_correlation(&s0_x, &s1_x);
+    let best_corr_y = best_cross_correlation(&s0_x, &s1_x);
+    let best_corr_x = best_cross_correlation(&s0_y, &s1_y);
     println!("best_corr_x {best_corr_x:?}");
-    let best_corr_y = best_cross_correlation(&s0_y, &s1_y);
     println!("best_corr_y {best_corr_y:?}");
 
     fn combine_images(a: &RgbaSubImage, b: &RgbaSubImage, offsets: (i32, i32)) -> image::RgbaImage {
@@ -332,12 +336,17 @@ pub fn main_histogram() -> Result<(), Error> {
         let combined_h = a.height() + b.height() * 2;
         println!("offsets: {offsets:?}");
         let mut img = image::RgbaImage::new(combined_w, combined_h);
-        img.copy_from(&b.to_image(), a.width(), a.height()).unwrap();
-        img.copy_from(&a.to_image(), (a.width() as i32  + offsets.0) as u32, (a.height() as i32  + offsets.1) as u32).unwrap();
+        img.copy_from(&a.to_image(), b.width() * 1, b.height() * 1).unwrap();
+        img.copy_from(&b.to_image(), (a.width() as i32 * 1  + offsets.0) as u32, (a.height()as i32  * 1  + offsets.1) as u32).unwrap();
         img
     }
 
-    let c = combine_images(&s0_block_roi, &s1_block_roi, (best_corr_x.0 as i32, best_corr_y.0 as i32));
+    // let xoff = -best_corr_y.0 as i32;
+    // let yoff = w as i32 - best_corr_x.0 as i32;
+    let xoff = best_corr_x.0 as i32;
+    let yoff = best_corr_y.0 as i32;
+
+    let c = combine_images(&s0_block_roi, &s1_block_roi, (xoff, yoff));
     c.save("/tmp/combined_c.png")?;
     
     Ok(())
