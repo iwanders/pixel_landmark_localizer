@@ -354,7 +354,7 @@ pub fn main_histogram() -> Result<(), Error> {
 
 use image::Rgba;
 fn pixel_diff_squared(a: &Rgba<u8>, b: &Rgba<u8>)  -> u16 {
-    println!("a: {a:?}, b:{b:?}");
+    // println!("a: {a:?}, b:{b:?}");
     a.0.iter().zip(b.0.iter()).map(|(pa, pb)| {
         (pa.max(pb) - pa.min(pb)) as u16
     }).sum()
@@ -365,7 +365,7 @@ pub fn main_landmark() -> Result<(), Error> {
     use image::GenericImageView;
     type RgbaSubImage<'a> = image::SubImage<&'a image::ImageBuffer<image::Rgba<u8>, Vec<u8>>>;
 
-    let image_path = std::path::PathBuf::from("../screenshots/Screenshot418.png");
+    let image_path = std::path::PathBuf::from("../screenshots/Screenshot444.png");
     let screenshot = image::open(&image_path)?.to_rgba8();
     
     let image_path = std::path::PathBuf::from("../screenshots/landmark_1.png");
@@ -387,23 +387,25 @@ pub fn main_landmark() -> Result<(), Error> {
         block: &RgbaSubImage,
         lm: &image::RgbaImage,
     ) -> u32 {
+        let pixel_diff_limit = 16;
+        let sum_limit = 32;
         for y in 0..(block.height() - lm.height()) {
             'b: for x in 0..(block.width() - lm.width()) {
-                if (x == 322 && y == 212) {
-                    // here, iterate through the landmark.
-                    let mut sum = 0;
-                    for ly in 0..lm.height() {
-                        for lx in 0..lm.width() {
-                            let b = &block.get_pixel(x + lx, y + ly);
-                            let l = &lm.get_pixel(lx, ly);
-                            let diff = pixel_diff_squared(b, l);
-                            println!("{x},{y}, {lx},{ly} -> {diff}");
-                            if diff > 16 {
-                                continue 'b;
-                            }
-                            sum += diff;
+                // here, iterate through the landmark.
+                let mut sum = 0;
+                for ly in 0..lm.height() {
+                    for lx in 0..lm.width() {
+                        let b = &block.get_pixel(x + lx, y + ly);
+                        let l = &lm.get_pixel(lx, ly);
+                        let diff = pixel_diff_squared(b, l);
+                        // println!("{x},{y}, {lx},{ly} -> {diff}");
+                        if diff > pixel_diff_limit {
+                            continue 'b;
                         }
+                        sum += diff;
                     }
+                }
+                if sum < sum_limit {
                     println!("Found landmark at {x}, {y} with {sum} ");
                 }
             }
