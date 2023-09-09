@@ -351,3 +351,73 @@ pub fn main_histogram() -> Result<(), Error> {
     
     Ok(())
 }
+
+use image::Rgba;
+fn pixel_diff_squared(a: &Rgba<u8>, b: &Rgba<u8>)  -> u16 {
+    println!("a: {a:?}, b:{b:?}");
+    a.0.iter().zip(b.0.iter()).map(|(pa, pb)| {
+        (pa.max(pb) - pa.min(pb)) as u16
+    }).sum()
+
+}
+
+pub fn main_landmark() -> Result<(), Error> {
+    use image::GenericImageView;
+    type RgbaSubImage<'a> = image::SubImage<&'a image::ImageBuffer<image::Rgba<u8>, Vec<u8>>>;
+
+    let image_path = std::path::PathBuf::from("../screenshots/Screenshot418.png");
+    let screenshot = image::open(&image_path)?.to_rgba8();
+    
+    let image_path = std::path::PathBuf::from("../screenshots/landmark_1.png");
+    let l1 = image::open(&image_path)?.to_rgba8();
+
+    let block = Rect {
+        x: 160,
+        y: 80,
+        w: 600,
+        h: 400,
+    };
+    let Rect { x, y, w, h } = block;
+    // let block_roi = screenshot.view(x, y, w, h);
+    let block_roi = screenshot.view(0, 0, screenshot.width(), screenshot.height());
+
+    block_roi.to_image().save("/tmp/block_image.png")?;
+
+    fn find_match(
+        block: &RgbaSubImage,
+        lm: &image::RgbaImage,
+    ) -> u32 {
+        for y in 0..(block.height() - lm.height()) {
+            'b: for x in 0..(block.width() - lm.width()) {
+                if (x == 322 && y == 212) {
+                    // here, iterate through the landmark.
+                    let mut sum = 0;
+                    for ly in 0..lm.height() {
+                        for lx in 0..lm.width() {
+                            let b = &block.get_pixel(x + lx, y + ly);
+                            let l = &lm.get_pixel(lx, ly);
+                            let diff = pixel_diff_squared(b, l);
+                            println!("{x},{y}, {lx},{ly} -> {diff}");
+                            if diff > 16 {
+                                continue 'b;
+                            }
+                            sum += diff;
+                        }
+                    }
+                    println!("Found landmark at {x}, {y} with {sum} ");
+                }
+            }
+        }
+        0
+    }
+
+    let start = std::time::Instant::now();
+
+    let best = find_match(
+        &block_roi,
+        &l1,
+    );
+    println!("best: {best:?}, took {}", start.elapsed().as_secs_f64());
+
+    Ok(())
+}
