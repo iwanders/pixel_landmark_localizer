@@ -1,8 +1,8 @@
 /// Struct to represent a rectangle.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Rect {
-    pub x: u32,
-    pub y: u32,
+    pub x: i32,
+    pub y: i32,
     pub w: u32,
     pub h: u32,
 }
@@ -23,28 +23,28 @@ impl Rect {
             && b.top() > self.bottom()
     }
 
-    pub fn contains(&self, x: u32, y: u32) -> bool {
+    pub fn contains(&self, x: i32, y: i32) -> bool {
         x >= self.left() && x <= self.right() && y >= self.bottom() && y <= self.top()
     }
 
     /// The highest y value of the rectangle (bottom in image coordinates!)
-    pub fn top(&self) -> u32 {
-        self.y + self.h
+    pub fn top(&self) -> i32 {
+        self.y + self.h as i32
     }
 
     /// The lowest y value of the rectangle (top in image coordinates!)
-    pub fn bottom(&self) -> u32 {
+    pub fn bottom(&self) -> i32 {
         self.y
     }
 
     /// The lowest x value of the rectangle.
-    pub fn left(&self) -> u32 {
+    pub fn left(&self) -> i32 {
         self.x
     }
 
     /// The highest x value of the rectangle.
-    pub fn right(&self) -> u32 {
-        self.x + self.w
+    pub fn right(&self) -> i32 {
+        self.x + self.w as i32
     }
 
     /// The width of the rectangle.

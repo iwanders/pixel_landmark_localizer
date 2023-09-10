@@ -3,8 +3,8 @@ use crate::util::Rect;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Coordinate {
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -36,7 +36,7 @@ impl Map {
         self.locations.push(Fixed { coordinate, id });
     }
 
-    pub fn landmarks(&self, rect: &Rect) -> Vec<LocationId> {
+    pub fn landmarks_in(&self, rect: &Rect) -> Vec<LocationId> {
         self.locations
             .iter()
             .enumerate()
