@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 pub struct MockScreenCapture {
     files: Vec<std::path::PathBuf>,
     index: usize,
