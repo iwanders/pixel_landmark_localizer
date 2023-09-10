@@ -22,13 +22,6 @@ impl ToRgb for Rgba<u8> {
 }
 
 use image::Rgba;
-fn pixel_diff_squared(a: &Rgba<u8>, b: &Rgba<u8>) -> u16 {
-    // println!("a: {a:?}, b:{b:?}");
-    a.0.iter()
-        .zip(b.0.iter())
-        .map(|(pa, pb)| (pa.max(pb) - pa.min(pb)) as u16)
-        .sum()
-}
 
 #[derive(Debug, Clone, Copy)]
 pub struct Pixel {
@@ -121,9 +114,6 @@ impl Landmark {
 }
 
 pub fn main_landmark() -> Result<(), Error> {
-    use image::GenericImageView;
-    type RgbaSubImage<'a> = image::SubImage<&'a image::ImageBuffer<image::Rgba<u8>, Vec<u8>>>;
-
     let image_path = std::path::PathBuf::from("../screenshots/Screenshot447.png");
     let screenshot = image::open(&image_path)?.to_rgba8();
 
@@ -145,10 +135,8 @@ pub fn main_landmark() -> Result<(), Error> {
     // block_roi.to_image().save("/tmp/block_image.png")?;
 
     fn find_match(block: &image::RgbaImage, rect: &Rect, lm: &Landmark) -> u32 {
-        let pixel_diff_limit = 16;
-        let sum_limit = 32;
         for y in rect.y..(rect.y + rect.h) {
-            'b: for x in rect.x..(rect.x + rect.w) {
+            for x in rect.x..(rect.x + rect.w) {
                 let present = lm.present(block, (x, y));
 
                 if present {
