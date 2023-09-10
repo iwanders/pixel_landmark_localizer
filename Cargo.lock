@@ -146,14 +146,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "feature_detector_fast"
-version = "0.1.0"
-source = "git+https://github.com/iwanders/feature_detector_fast?rev=cfdbfe05e36eb6adf3c908bd47727f321c50efa3#cfdbfe05e36eb6adf3c908bd47727f321c50efa3"
-dependencies = [
- "image",
-]
-
-[[package]]
 name = "flate2"
 version = "1.0.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -249,10 +241,8 @@ dependencies = [
 name = "isometric_localizer"
 version = "0.1.0"
 dependencies = [
- "feature_detector_fast",
  "image",
  "rand_xoshiro",
- "registration_icp_2d",
  "screen_capture",
 ]
 
@@ -472,11 +462,6 @@ dependencies = [
  "crossbeam-utils",
  "num_cpus",
 ]
-
-[[package]]
-name = "registration_icp_2d"
-version = "0.1.0"
-source = "git+https://github.com/iwanders/playground-registration_icp_2d?rev=65dc9351fce30906fe7be1fadc57f95920ecd7f1#65dc9351fce30906fe7be1fadc57f95920ecd7f1"
 
 [[package]]
 name = "scopeguard"
