@@ -14,7 +14,7 @@ impl ToRgb for Rgba<u8> {
 
 use image::Rgba;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct Pixel {
     pub rgb: RGB,
     pub offset: (u32, u32),
@@ -27,7 +27,7 @@ impl Pixel {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Landmark {
     pixels: Vec<Pixel>,
     pixel_difference_threshold: u16,

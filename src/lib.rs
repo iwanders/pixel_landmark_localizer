@@ -8,6 +8,7 @@ mod util;
 pub use util::Rect;
 
 pub use landmark::Landmark;
+pub mod map;
 
 pub fn main_landmark() -> Result<(), Error> {
     let image_path = std::path::PathBuf::from("../screenshots/Screenshot439.png");
