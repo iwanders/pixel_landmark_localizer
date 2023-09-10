@@ -57,6 +57,9 @@ impl Landmark {
         for ly in 0..height {
             for lx in 0..width {
                 let p = &landmark.get_pixel(lx, ly);
+                if p.0[3] != 255 {
+                    continue; // transparent pixel
+                }
                 let rgb = RGB {
                     r: p.0[0],
                     g: p.0[1],
