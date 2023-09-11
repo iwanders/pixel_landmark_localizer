@@ -5,16 +5,17 @@ pub type Error = Box<dyn std::error::Error>;
 mod landmark;
 mod mock;
 mod util;
-pub use util::Rect;
+pub use util::{Rect, Coordinate};
 
 pub use landmark::Landmark;
 pub mod map;
 use map::Map;
 
+
+
 pub fn image_to_landmark(path: &std::path::Path) -> Result<Landmark, Error> {
     // let image_path = std::path::PathBuf::from("../screenshots/landmark_3.png");
     let l1 = image::open(&path)?.to_rgba8();
-
     Ok(Landmark::from_image(&l1, 6))
 }
 

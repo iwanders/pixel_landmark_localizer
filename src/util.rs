@@ -1,3 +1,11 @@
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct Coordinate {
+    pub x: i32,
+    pub y: i32,
+}
+
+
 /// Struct to represent a rectangle.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Rect {
@@ -5,6 +13,29 @@ pub struct Rect {
     pub y: i32,
     pub w: u32,
     pub h: u32,
+}
+
+impl std::ops::Add<Coordinate> for Rect {
+    type Output = Rect;
+    fn add(self, rhs: Coordinate) -> Self::Output {
+        Rect {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            w: self.w,
+            h: self.h,
+        }
+    }
+}
+
+impl std::ops::Add<Rect> for Coordinate {
+    type Output = Rect;
+    fn add(self, rhs: Rect) -> Self::Output {
+        Rect {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            w: rhs.w,
+            h: rhs.h,
+        }}
 }
 
 impl Rect {

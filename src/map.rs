@@ -1,11 +1,6 @@
 use crate::landmark::Landmark;
 use crate::util::Rect;
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct Coordinate {
-    x: i32,
-    y: i32,
-}
+use crate::Coordinate;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct LandmarkId(usize);
