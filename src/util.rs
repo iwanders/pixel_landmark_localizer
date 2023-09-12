@@ -1,13 +1,31 @@
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub struct Coordinate {
     pub x: i32,
     pub y: i32,
 }
 
+impl std::ops::Sub<Coordinate> for Coordinate {
+    type Output = Coordinate;
+    fn sub(self, rhs: Coordinate) -> Self::Output {
+        Coordinate {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+impl std::ops::Add<Coordinate> for Coordinate {
+    type Output = Coordinate;
+    fn add(self, rhs: Coordinate) -> Self::Output {
+        Coordinate {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
 
 /// Struct to represent a rectangle.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Rect {
     pub x: i32,
     pub y: i32,
@@ -35,7 +53,32 @@ impl std::ops::Add<Rect> for Coordinate {
             y: self.y + rhs.y,
             w: rhs.w,
             h: rhs.h,
-        }}
+        }
+    }
+}
+
+impl std::ops::Sub<Coordinate> for Rect {
+    type Output = Rect;
+    fn sub(self, rhs: Coordinate) -> Self::Output {
+        Rect {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            w: self.w,
+            h: self.h,
+        }
+    }
+}
+
+impl std::ops::Sub<Rect> for Coordinate {
+    type Output = Rect;
+    fn sub(self, rhs: Rect) -> Self::Output {
+        Rect {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            w: rhs.w,
+            h: rhs.h,
+        }
+    }
 }
 
 impl Rect {

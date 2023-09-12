@@ -9,15 +9,15 @@ pub struct LandmarkId(usize);
 pub struct LocationId(usize);
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct Fixed {
-    coordinate: Coordinate,
-    id: LandmarkId,
+pub struct LandmarkLocation {
+    pub location: Coordinate,
+    pub id: LandmarkId,
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct Map {
     landmarks: Vec<Landmark>,
-    locations: Vec<Fixed>,
+    locations: Vec<LandmarkLocation>,
 }
 
 impl Map {
@@ -27,8 +27,8 @@ impl Map {
         id
     }
 
-    pub fn add_fixed(&mut self, coordinate: Coordinate, id: LandmarkId) {
-        self.locations.push(Fixed { coordinate, id });
+    pub fn add_fixed(&mut self, location: Coordinate, id: LandmarkId) {
+        self.locations.push(LandmarkLocation { location, id });
     }
 
     pub fn landmarks_in(&self, rect: &Rect) -> Vec<LocationId> {
@@ -36,7 +36,7 @@ impl Map {
             .iter()
             .enumerate()
             .filter_map(|(i, fixed)| {
-                if rect.contains(fixed.coordinate.x, fixed.coordinate.y) {
+                if rect.contains(fixed.location.x, fixed.location.y) {
                     Some(LocationId(i))
                 } else {
                     None
@@ -45,10 +45,15 @@ impl Map {
             .collect()
     }
 
-    pub fn location(&self, id: LocationId) -> &Fixed {
+    pub fn location(&self, id: LocationId) -> &LandmarkLocation {
         &self.locations[id.0]
     }
+
     pub fn landmark(&self, id: LandmarkId) -> &Landmark {
         &self.landmarks[id.0]
+    }
+
+    pub fn landmark_ids(&self) -> Vec<LandmarkId> {
+        (0..self.landmarks.len()).map(|i| LandmarkId(i)).collect()
     }
 }
