@@ -1,5 +1,15 @@
 // ffmpeg -i 2023-08-13_23-03-24.mp4 -r 60 frames/frame%04d.png
 
+/*
+Make landmarks by:
+    1. Difference in gimp between two screenshots
+    2. Select by color, click a fully black pixel.
+    3. Make new channel, check initialise from selection.
+    4. Repeat as needed, building channels with masks where pixels are zero.
+    5. Subtract all masks, these pixels don't change.
+    6. Create template from the pixels that are selected.
+*/
+
 pub type Error = Box<dyn std::error::Error>;
 
 mod landmark;
@@ -36,19 +46,22 @@ pub fn main_landmark() -> Result<(), Error> {
     let image_path = std::path::PathBuf::from("../screenshots/Screenshot446.png");
     let screenshot = image::open(&image_path)?.to_rgba8();
 
-    let lm1 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_1.png"))?;
-    let lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_2.png"))?;
-    let mut test_map = Map::default();
-
-    let lm1 = test_map.add_landmark(lm1);
-    let lm2 = test_map.add_landmark(lm2);
-
     let roi = Rect {
         x: 0,
         y: 0,
         w: 640,
         h: 408,
     };
+
+    let lm1 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_1.png"))?;
+    let lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_2.png"))?;
+    let mut test_map = Map::default();
+
+    let lm2_found = Localizer::search_landmark(&screenshot, &roi, &lm2);
+    println!("lm2_found: {lm2_found:?}");
+
+    let lm1 = test_map.add_landmark(lm1);
+    let lm2 = test_map.add_landmark(lm2);
 
     let mut localizer = Localizer::new(test_map, Default::default());
 

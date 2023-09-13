@@ -40,7 +40,7 @@ impl Localizer {
                 w: 2 * SEARCH_DISTANCE,
                 h: 2 * SEARCH_DISTANCE,
             };
-            if let Some(found_pos) = Self::search_landmark(image, landmark, &search_box) {
+            if let Some(found_pos) = Self::search_landmark(image, &search_box, landmark) {
                 offsets.push((found_pos, location));
             }
         }
@@ -51,7 +51,8 @@ impl Localizer {
         let mut res = vec![];
         for id in self.map.landmark_ids() {
             let landmark = self.map.landmark(id);
-            if let Some(coordinate) = Self::search_landmark(image, landmark, roi) {
+            println!("landmark: {id:?}");
+            if let Some(coordinate) = Self::search_landmark(image, roi, landmark) {
                 res.push(LandmarkLocation {
                     location: coordinate + self.position,
                     id,
@@ -63,8 +64,8 @@ impl Localizer {
 
     pub fn search_landmark(
         image: &image::RgbaImage,
-        landmark: &Landmark,
         search: &Rect,
+        landmark: &Landmark,
     ) -> Option<Coordinate> {
         for y in (search.y)..(search.y + search.h as i32) {
             for x in (search.x)..(search.x + search.w as i32) {
