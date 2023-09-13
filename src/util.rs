@@ -14,6 +14,16 @@ impl std::ops::Sub<Coordinate> for Coordinate {
     }
 }
 
+impl std::ops::Neg for Coordinate {
+    type Output = Coordinate;
+    fn neg(self) -> Self::Output {
+        Coordinate {
+            x: -self.x,
+            y: -self.y,
+        }
+    }
+}
+
 impl std::ops::Add<Coordinate> for Coordinate {
     type Output = Coordinate;
     fn add(self, rhs: Coordinate) -> Self::Output {

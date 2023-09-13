@@ -71,20 +71,22 @@ pub fn main_landmark() -> Result<(), Error> {
     let mut localizer = Localizer::new(test_map, Default::default());
 
     let initial = localizer.search_all(&screenshot, &roi);
-
-    localizer.set_position(initial[0].location);
+    println!("initial: {initial:?}");
+    localizer.set_position(-initial[0].location);
 
     let start = std::time::Instant::now();
-    let loc = localizer.localize(&screenshot, &roi);
 
-    println!("took {}", start.elapsed().as_secs_f64());
+    let loc = localizer.localize(&screenshot, &roi);
     println!("location: {loc:?}");
 
+    let loc = localizer.localize(&screenshot, &roi);
+    println!("location: {loc:?}");
+
+    println!("took {}", start.elapsed().as_secs_f64());
+
     let mut res = localizer.search_all(&screenshot, &roi);
-    for p in res.iter_mut() {
-        p.location = p.location - loc - loc;
-    }
     println!("Res: {res:?}");
+
     // let best = find_match(, test_map.landmark(lm2));
 
     Ok(())

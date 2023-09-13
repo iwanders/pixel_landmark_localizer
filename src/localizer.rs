@@ -6,9 +6,13 @@ use crate::Rect;
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct Localizer {
+    /// Position is the location of the top left corner of the screen.
     position: Coordinate,
     map: Map,
 }
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+pub struct ScreenCoordinate(pub Coordinate);
 
 impl Localizer {
     pub fn new(map: Map, position: Coordinate) -> Self {
@@ -20,7 +24,7 @@ impl Localizer {
 
     pub fn localize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Coordinate {
         // Determine the expected landmarks in the roi in map frame.
-        let map_roi = *roi - self.position;
+        let map_roi = *roi + self.position;
 
         // Expected locations in this roi:
         let expected_locations = self.map.landmarks_in(&map_roi);
@@ -33,7 +37,7 @@ impl Localizer {
         for location in expected_locations {
             let loc = self.map.location(location);
             let landmark = self.map.landmark(loc.id);
-            let screen_expected_pos = loc.location + self.position;
+            let screen_expected_pos = loc.location - self.position;
 
             let search_box = Rect {
                 x: (screen_expected_pos.x - SEARCH_DISTANCE as i32).max(0),
@@ -45,10 +49,10 @@ impl Localizer {
                 offsets.push((found_pos, location));
             }
         }
-        println!("offsets: {offsets:?}");
+        println!("offsets: {offsets:#?}");
         if let Some(found) = offsets.first() {
             let map_location = self.map.location(found.1);
-            self.position = found.0 + map_location.location;
+            self.position = map_location.location - found.0 .0;
         }
         self.position
     }
@@ -58,9 +62,9 @@ impl Localizer {
         for id in self.map.landmark_ids() {
             let landmark = self.map.landmark(id);
             // println!("landmark: {id:?}");
-            if let Some(coordinate) = Self::search_landmark(image, roi, landmark) {
+            if let Some(screen_coordinate) = Self::search_landmark(image, roi, landmark) {
                 res.push(LandmarkLocation {
-                    location: coordinate + self.position,
+                    location: screen_coordinate.0 + self.position,
                     id,
                 });
             }
@@ -72,7 +76,7 @@ impl Localizer {
         image: &image::RgbaImage,
         search: &Rect,
         landmark: &Landmark,
-    ) -> Option<Coordinate> {
+    ) -> Option<ScreenCoordinate> {
         let r = Self::search_landmarks(image, search, landmark, 1);
         r.first().copied()
     }
@@ -82,7 +86,7 @@ impl Localizer {
         search: &Rect,
         landmark: &Landmark,
         limit: usize,
-    ) -> Vec<Coordinate> {
+    ) -> Vec<ScreenCoordinate> {
         let mut res = vec![];
         for y in (search.y)..(search.y + search.h as i32) {
             for x in (search.x)..(search.x + search.w as i32) {
@@ -90,7 +94,7 @@ impl Localizer {
                 let present = landmark.present(image, (x as u32, y as u32));
 
                 if present {
-                    res.push(Coordinate { x, y });
+                    res.push(ScreenCoordinate(Coordinate { x, y }));
                     if res.len() >= limit {
                         return res;
                     }
