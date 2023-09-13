@@ -57,18 +57,22 @@ pub fn main_landmark() -> Result<(), Error> {
     let lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_2.png"))?;
     let mut test_map = Map::default();
 
-    let lm2_found = Localizer::search_landmarks(&screenshot, &roi, &lm2, 10000);
-    println!("lm2_found: {lm2_found:?}");
+    // let lm2_found = Localizer::search_landmarks(&screenshot, &roi, &lm2, 10000);
+    // println!("lm2_found: {lm2_found:?}");
 
     let lm1 = test_map.add_landmark(lm1);
     let lm2 = test_map.add_landmark(lm2);
 
+    // add lm1 to the fixed location at the origin.
+    // test_map.add_fixed(Coordinate{x: 100, y: 100}, lm1);
+    test_map.add_fixed(Coordinate::default(), lm1);
+
     let mut localizer = Localizer::new(test_map, Default::default());
 
     let start = std::time::Instant::now();
-    // localizer.localize(&screenshot, &roi);
-    let res = localizer.search_all(&screenshot, &roi);
-    println!("Res: {res:?}");
+    localizer.localize(&screenshot, &roi);
+    // let res = localizer.search_all(&screenshot, &roi);
+    // println!("Res: {res:?}");
     println!("took {}", start.elapsed().as_secs_f64());
 
     // let best = find_match(, test_map.landmark(lm2));

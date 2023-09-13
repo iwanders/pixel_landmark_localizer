@@ -73,6 +73,12 @@ impl Landmark {
         img: &T,
         position: (u32, u32),
     ) -> bool {
+        // Check bounds, if we don't fit on the image, we can for sure return false.
+        if ((position.0 + self.width) > img.width()) || ((position.1 + self.height) > img.height())
+        {
+            return false;
+        }
+
         for p in self.pixels.iter() {
             let x = position.0 + p.offset.0;
             let y = position.1 + p.offset.1;
