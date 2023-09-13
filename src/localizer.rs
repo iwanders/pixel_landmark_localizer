@@ -18,12 +18,13 @@ impl Localizer {
     // screen -> map: screen + self.position.
     // map -> screen: screen - self.position
 
-    pub fn localize(&mut self, image: &image::RgbaImage, roi: &Rect) {
+    pub fn localize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Coordinate {
         // Determine the expected landmarks in the roi in map frame.
-        let map_roi = *roi + self.position;
+        let map_roi = *roi - self.position;
 
         // Expected locations in this roi:
         let expected_locations = self.map.landmarks_in(&map_roi);
+        println!("expected_locations: {expected_locations:?}");
 
         // Then, try to find the expected landmarks in the image.
         const SEARCH_DISTANCE: u32 = 15;
@@ -32,7 +33,7 @@ impl Localizer {
         for location in expected_locations {
             let loc = self.map.location(location);
             let landmark = self.map.landmark(loc.id);
-            let screen_expected_pos = loc.location - self.position;
+            let screen_expected_pos = loc.location + self.position;
 
             let search_box = Rect {
                 x: (screen_expected_pos.x - SEARCH_DISTANCE as i32).max(0),
@@ -45,6 +46,11 @@ impl Localizer {
             }
         }
         println!("offsets: {offsets:?}");
+        if let Some(found) = offsets.first() {
+            let map_location = self.map.location(found.1);
+            self.position = found.0 + map_location.location;
+        }
+        self.position
     }
 
     pub fn search_all(&self, image: &image::RgbaImage, roi: &Rect) -> Vec<LandmarkLocation> {
@@ -92,5 +98,9 @@ impl Localizer {
             }
         }
         res
+    }
+
+    pub fn set_position(&mut self, position: Coordinate) {
+        self.position = position;
     }
 }
