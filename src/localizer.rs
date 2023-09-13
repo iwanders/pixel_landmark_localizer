@@ -67,15 +67,29 @@ impl Localizer {
         search: &Rect,
         landmark: &Landmark,
     ) -> Option<Coordinate> {
+        let r = Self::search_landmarks(image, search, landmark, 1);
+        r.first().copied()
+    }
+
+    pub fn search_landmarks(
+        image: &image::RgbaImage,
+        search: &Rect,
+        landmark: &Landmark,
+        limit: usize,
+    ) -> Vec<Coordinate> {
+        let mut res = vec![];
         for y in (search.y)..(search.y + search.h as i32) {
             for x in (search.x)..(search.x + search.w as i32) {
                 let present = landmark.present(image, (x as u32, y as u32));
 
                 if present {
-                    return Some(Coordinate { x, y });
+                    res.push(Coordinate { x, y });
+                    if res.len() >= limit {
+                        return res;
+                    }
                 }
             }
         }
-        None
+        res
     }
 }

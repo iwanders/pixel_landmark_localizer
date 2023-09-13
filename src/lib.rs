@@ -57,7 +57,7 @@ pub fn main_landmark() -> Result<(), Error> {
     let lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_2.png"))?;
     let mut test_map = Map::default();
 
-    let lm2_found = Localizer::search_landmark(&screenshot, &roi, &lm2);
+    let lm2_found = Localizer::search_landmarks(&screenshot, &roi, &lm2, 10000);
     println!("lm2_found: {lm2_found:?}");
 
     let lm1 = test_map.add_landmark(lm1);
