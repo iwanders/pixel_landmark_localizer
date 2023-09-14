@@ -66,7 +66,8 @@ pub fn main_landmark() -> Result<(), Error> {
     // add lm1 to the fixed location at the origin.
     // test_map.add_fixed(Coordinate{x: 100, y: 100}, lm1);
 
-    test_map.add_fixed(Coordinate::default(), lm1);
+    // test_map.add_fixed(Coordinate{x: 0, y: 0}, lm1);
+    test_map.add_fixed(Coordinate { x: -58, y: -9 }, lm2);
 
     let mut localizer = Localizer::new(test_map, Default::default());
     localizer.relocalize(&screenshot, &roi);

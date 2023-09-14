@@ -11,6 +11,7 @@ pub struct Localizer {
     map: Map,
 }
 
+/// Helper to make screen coordinates a distinct type.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub struct ScreenCoordinate(pub Coordinate);
 
@@ -22,6 +23,8 @@ impl Localizer {
     // screen -> map: screen + self.position.
     // map -> screen: screen - self.position
 
+    /// Do a fresh relocalisation, doing a full search on the screen and setting the position based
+    /// on the known location of any found landmark.
     pub fn relocalize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Option<Coordinate> {
         let initial = self.search_all(image, roi);
         if let Some(found_loc) = initial.first() {
@@ -32,6 +35,7 @@ impl Localizer {
         }
     }
 
+    /// Localize relative to the previous position, searching around expected landmarks.
     pub fn localize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Coordinate {
         // Determine the expected landmarks in the roi in map frame.
         let map_roi = *roi + self.position;
@@ -67,6 +71,7 @@ impl Localizer {
         self.position
     }
 
+    /// Search all landmarks in the current screen, using the current position.
     pub fn search_all(&self, image: &image::RgbaImage, roi: &Rect) -> Vec<LandmarkLocation> {
         let mut res = vec![];
         for id in self.map.landmark_ids() {
@@ -82,6 +87,7 @@ impl Localizer {
         res
     }
 
+    /// Search a landmark in the image, terminating if one is found.
     pub fn search_landmark(
         image: &image::RgbaImage,
         search: &Rect,
@@ -91,6 +97,7 @@ impl Localizer {
         r.first().copied()
     }
 
+    /// Search a landmark in the image, using the provided search box and limiting the search.
     pub fn search_landmarks(
         image: &image::RgbaImage,
         search: &Rect,
@@ -114,6 +121,7 @@ impl Localizer {
         res
     }
 
+    /// Set the current position of the localizer.
     pub fn set_position(&mut self, position: Coordinate) {
         self.position = position;
     }
