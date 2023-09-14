@@ -9,15 +9,31 @@ pub struct Localizer {
     /// Position is the location of the top left corner of the screen.
     position: Coordinate,
     map: Map,
+    config: LocalizerConfig,
 }
 
 /// Helper to make screen coordinates a distinct type.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub struct ScreenCoordinate(pub Coordinate);
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct LocalizerConfig {
+    pub search_box: u32,
+}
+
+impl Default for LocalizerConfig {
+    fn default() -> LocalizerConfig {
+        LocalizerConfig { search_box: 25 }
+    }
+}
+
 impl Localizer {
-    pub fn new(map: Map, position: Coordinate) -> Self {
-        Localizer { position, map }
+    pub fn new(map: Map, position: Coordinate, config: LocalizerConfig) -> Self {
+        Localizer {
+            position,
+            map,
+            config,
+        }
     }
 
     // screen -> map: screen + self.position.
@@ -57,7 +73,7 @@ impl Localizer {
     }
 
     /// Localize relative to the previous position, searching around expected landmarks.
-    pub fn localize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Coordinate {
+    pub fn localize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Option<Coordinate> {
         // Determine the expected landmarks in the roi in map frame.
         let map_roi = *roi + self.position;
 
@@ -65,8 +81,6 @@ impl Localizer {
         let expected_locations = self.map.landmarks_in(&map_roi);
 
         // Then, try to find the expected landmarks in the image.
-        const SEARCH_DISTANCE: u32 = 55;
-
         let mut offsets = vec![];
         for location in expected_locations {
             let loc = self.map.location(location);
@@ -75,21 +89,23 @@ impl Localizer {
             // println!("expected: {:?} at {screen_expected_pos:?}", loc.id);
 
             let search_box = Rect {
-                x: (screen_expected_pos.x - SEARCH_DISTANCE as i32).max(0),
-                y: (screen_expected_pos.y - SEARCH_DISTANCE as i32).max(0),
-                w: 2 * SEARCH_DISTANCE,
-                h: 2 * SEARCH_DISTANCE,
+                x: (screen_expected_pos.x - self.config.search_box as i32).max(0),
+                y: (screen_expected_pos.y - self.config.search_box as i32).max(0),
+                w: 2 * self.config.search_box,
+                h: 2 * self.config.search_box,
             };
             if let Some(found_pos) = Self::search_landmark(image, &search_box, landmark) {
                 offsets.push((found_pos, location));
             }
         }
+
         // println!("offsets: {offsets:#?}");
         if let Some(found) = offsets.first() {
             let map_location = self.map.location(found.1);
             self.position = map_location.location - found.0 .0;
+            return Some(self.position);
         }
-        self.position
+        None
     }
 
     pub fn map(&mut self, image: &image::RgbaImage, roi: &Rect) {

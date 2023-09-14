@@ -63,12 +63,13 @@ pub fn main_landmark() -> Result<(), Error> {
     // test_map.add_fixed(Coordinate{x: 0, y: 0}, lm1);
     test_map.add_fixed(Coordinate { x: -58, y: -9 }, lm2);
 
-    let mut localizer = Localizer::new(test_map, Default::default());
+    let mut localizer = Localizer::new(test_map, Default::default(), Default::default());
 
     let mut _capture =
         mock::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/leg_1/"))?;
     let screenshot = _capture.next_frame()?;
     localizer.relocalize(&screenshot, &roi);
+    let loc = localizer.localize(&screenshot, &roi);
 
     // let lm2_found = Localizer::search_landmarks(&screenshot, &roi, &lm1, 10000);
     // println!("lm2_found: {lm2_found:?}");
@@ -79,8 +80,12 @@ pub fn main_landmark() -> Result<(), Error> {
         let screenshot = _capture.next_frame()?;
         let start = std::time::Instant::now();
 
-        let loc = localizer.localize(&screenshot, &roi);
-        println!("location: {loc:?}");
+        if let Some(loc) = localizer.localize(&screenshot, &roi) {
+            println!("location: {loc:?}");
+        } else {
+            let reloc = localizer.relocalize(&screenshot, &roi);
+            println!("   reloc: {reloc:?}");
+        }
         println!("took {}", start.elapsed().as_secs_f64());
     }
 
