@@ -43,7 +43,7 @@ fn find_match(block: &image::RgbaImage, rect: &Rect, lm: &Landmark) -> u32 {
 }
 
 pub fn main_landmark() -> Result<(), Error> {
-    let image_path = std::path::PathBuf::from("../screenshots/Screenshot446.png");
+    let image_path = std::path::PathBuf::from("../screenshots/Screenshot439.png");
     let screenshot = image::open(&image_path)?.to_rgba8();
 
     let roi = Rect {
@@ -53,8 +53,8 @@ pub fn main_landmark() -> Result<(), Error> {
         h: 408,
     };
 
-    let lm1 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_1.png"))?;
-    let lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_2.png"))?;
+    let lm1 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_3.png"))?;
+    let lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_4.png"))?;
     let mut test_map = Map::default();
 
     let lm2_found = Localizer::search_landmarks(&screenshot, &roi, &lm1, 10000);
@@ -75,6 +75,7 @@ pub fn main_landmark() -> Result<(), Error> {
     let start = std::time::Instant::now();
 
     let loc = localizer.localize(&screenshot, &roi);
+
     println!("location: {loc:?}");
 
     let loc = localizer.localize(&screenshot, &roi);
@@ -84,6 +85,9 @@ pub fn main_landmark() -> Result<(), Error> {
 
     let mut res = localizer.search_all(&screenshot, &roi);
     println!("Res: {res:?}");
+
+    localizer.map(&screenshot, &roi);
+    println!("localizer: {localizer:?}");
 
     // let best = find_match(, test_map.landmark(lm2));
 

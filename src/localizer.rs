@@ -71,6 +71,23 @@ impl Localizer {
         self.position
     }
 
+    pub fn map(&mut self, image: &image::RgbaImage, roi: &Rect) {
+        let all_matches = self.search_all(image, roi);
+        let mut to_insert = vec![];
+        {
+            let locs = self.map.locations();
+            for m in all_matches.iter() {
+                if !locs.contains(m) {
+                    to_insert.push(m);
+                }
+            }
+        }
+
+        for m in to_insert {
+            self.map.add_fixed(m.location, m.id);
+        }
+    }
+
     /// Search all landmarks in the current screen, using the current position.
     pub fn search_all(&self, image: &image::RgbaImage, roi: &Rect) -> Vec<LandmarkLocation> {
         let mut res = vec![];

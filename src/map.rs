@@ -48,6 +48,9 @@ impl Map {
     pub fn location(&self, id: LocationId) -> &LandmarkLocation {
         &self.locations[id.0]
     }
+    pub fn locations(&self) -> &[LandmarkLocation] {
+        &self.locations
+    }
 
     pub fn landmark(&self, id: LandmarkId) -> &Landmark {
         &self.landmarks[id.0]
