@@ -27,8 +27,29 @@ impl Localizer {
     /// on the known location of any found landmark.
     pub fn relocalize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Option<Coordinate> {
         let initial = self.search_all(image, roi);
-        if let Some(found_loc) = initial.first() {
-            self.set_position(-found_loc.location);
+
+        let mut potential_locations = vec![];
+        for loc in initial {
+            // we found this landmark, see where it exists on the map.
+            let candidates = self.map.locations_by_landmark(loc.id);
+
+            for candidate in candidates {
+                let estimated_correction = loc.location - candidate.location;
+                potential_locations.push((
+                    estimated_correction.dist_sq(),
+                    loc,
+                    candidate.clone(),
+                    estimated_correction,
+                ));
+            }
+        }
+
+        // Sort by lowest estimated correction, and use that value.
+        potential_locations.sort_by(|a, b| a.0.cmp(&b.0));
+        // println!("potential_locations: {potential_locations:#?}");
+
+        if let Some((_, loc, _, correction)) = potential_locations.first() {
+            self.set_position(self.position - *correction);
             Some(self.position)
         } else {
             None
@@ -42,16 +63,16 @@ impl Localizer {
 
         // Expected locations in this roi:
         let expected_locations = self.map.landmarks_in(&map_roi);
-        println!("expected_locations: {expected_locations:?}");
 
         // Then, try to find the expected landmarks in the image.
-        const SEARCH_DISTANCE: u32 = 15;
+        const SEARCH_DISTANCE: u32 = 55;
 
         let mut offsets = vec![];
         for location in expected_locations {
             let loc = self.map.location(location);
             let landmark = self.map.landmark(loc.id);
             let screen_expected_pos = loc.location - self.position;
+            // println!("expected: {:?} at {screen_expected_pos:?}", loc.id);
 
             let search_box = Rect {
                 x: (screen_expected_pos.x - SEARCH_DISTANCE as i32).max(0),
@@ -63,7 +84,7 @@ impl Localizer {
                 offsets.push((found_pos, location));
             }
         }
-        println!("offsets: {offsets:#?}");
+        // println!("offsets: {offsets:#?}");
         if let Some(found) = offsets.first() {
             let map_location = self.map.location(found.1);
             self.position = map_location.location - found.0 .0;

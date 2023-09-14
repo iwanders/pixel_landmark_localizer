@@ -48,8 +48,13 @@ impl Map {
     pub fn location(&self, id: LocationId) -> &LandmarkLocation {
         &self.locations[id.0]
     }
+
     pub fn locations(&self) -> &[LandmarkLocation] {
         &self.locations
+    }
+
+    pub fn locations_by_landmark(&self, id: LandmarkId) -> Vec<&LandmarkLocation> {
+        self.locations.iter().filter(|l| l.id == id).collect()
     }
 
     pub fn landmark(&self, id: LandmarkId) -> &Landmark {

@@ -4,6 +4,12 @@ pub struct Coordinate {
     pub y: i32,
 }
 
+impl Coordinate {
+    pub fn dist_sq(&self) -> i32 {
+        self.x * self.x + self.y * self.y
+    }
+}
+
 impl std::ops::Sub<Coordinate> for Coordinate {
     type Output = Coordinate;
     fn sub(self, rhs: Coordinate) -> Self::Output {

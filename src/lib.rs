@@ -43,9 +43,6 @@ fn find_match(block: &image::RgbaImage, rect: &Rect, lm: &Landmark) -> u32 {
 }
 
 pub fn main_landmark() -> Result<(), Error> {
-    let image_path = std::path::PathBuf::from("../screenshots/Screenshot439.png");
-    let screenshot = image::open(&image_path)?.to_rgba8();
-
     let roi = Rect {
         x: 0,
         y: 0,
@@ -57,9 +54,6 @@ pub fn main_landmark() -> Result<(), Error> {
     let lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_4.png"))?;
     let mut test_map = Map::default();
 
-    let lm2_found = Localizer::search_landmarks(&screenshot, &roi, &lm1, 10000);
-    println!("lm2_found: {lm2_found:?}");
-
     let lm1 = test_map.add_landmark(lm1);
     let lm2 = test_map.add_landmark(lm2);
 
@@ -70,14 +64,27 @@ pub fn main_landmark() -> Result<(), Error> {
     test_map.add_fixed(Coordinate { x: -58, y: -9 }, lm2);
 
     let mut localizer = Localizer::new(test_map, Default::default());
+
+    let mut _capture =
+        mock::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/leg_1/"))?;
+    let screenshot = _capture.next_frame()?;
     localizer.relocalize(&screenshot, &roi);
 
+    // let lm2_found = Localizer::search_landmarks(&screenshot, &roi, &lm1, 10000);
+    // println!("lm2_found: {lm2_found:?}");
+
+    // let image_path = std::path::PathBuf::from("../screenshots/run1/leg_1/Screenshot456.png");
+    // let screenshot = image::open(&image_path)?.to_rgba8();
+    loop {
+        let screenshot = _capture.next_frame()?;
+        let start = std::time::Instant::now();
+
+        let loc = localizer.localize(&screenshot, &roi);
+        println!("location: {loc:?}");
+        println!("took {}", start.elapsed().as_secs_f64());
+    }
+
     let start = std::time::Instant::now();
-
-    let loc = localizer.localize(&screenshot, &roi);
-
-    println!("location: {loc:?}");
-
     let loc = localizer.localize(&screenshot, &roi);
     println!("location: {loc:?}");
 
@@ -87,7 +94,7 @@ pub fn main_landmark() -> Result<(), Error> {
     println!("Res: {res:?}");
 
     localizer.map(&screenshot, &roi);
-    println!("localizer: {localizer:?}");
+    // println!("localizer: {localizer:?}");
 
     // let best = find_match(, test_map.landmark(lm2));
 
