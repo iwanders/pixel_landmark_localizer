@@ -22,6 +22,16 @@ impl Localizer {
     // screen -> map: screen + self.position.
     // map -> screen: screen - self.position
 
+    pub fn relocalize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Option<Coordinate> {
+        let initial = self.search_all(image, roi);
+        if let Some(found_loc) = initial.first() {
+            self.set_position(-found_loc.location);
+            Some(self.position)
+        } else {
+            None
+        }
+    }
+
     pub fn localize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Coordinate {
         // Determine the expected landmarks in the roi in map frame.
         let map_roi = *roi + self.position;

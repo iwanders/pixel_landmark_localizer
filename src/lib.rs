@@ -43,7 +43,7 @@ fn find_match(block: &image::RgbaImage, rect: &Rect, lm: &Landmark) -> u32 {
 }
 
 pub fn main_landmark() -> Result<(), Error> {
-    let image_path = std::path::PathBuf::from("../screenshots/Screenshot446.png");
+    let image_path = std::path::PathBuf::from("../screenshots/Screenshot447.png");
     let screenshot = image::open(&image_path)?.to_rgba8();
 
     let roi = Rect {
@@ -69,10 +69,7 @@ pub fn main_landmark() -> Result<(), Error> {
     test_map.add_fixed(Coordinate::default(), lm1);
 
     let mut localizer = Localizer::new(test_map, Default::default());
-
-    let initial = localizer.search_all(&screenshot, &roi);
-    println!("initial: {initial:?}");
-    localizer.set_position(-initial[0].location);
+    localizer.relocalize(&screenshot, &roi);
 
     let start = std::time::Instant::now();
 
