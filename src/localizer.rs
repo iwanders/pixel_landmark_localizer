@@ -76,13 +76,14 @@ impl Localizer {
         let mut res = vec![];
         for id in self.map.landmark_ids() {
             let landmark = self.map.landmark(id);
-            // println!("landmark: {id:?}");
-            if let Some(screen_coordinate) = Self::search_landmark(image, roi, landmark) {
-                res.push(LandmarkLocation {
-                    location: screen_coordinate.0 + self.position,
-                    id,
-                });
-            }
+            res.extend(
+                Self::search_landmarks(image, roi, landmark, usize::MAX)
+                    .iter()
+                    .map(|s| LandmarkLocation {
+                        location: s.0 + self.position,
+                        id,
+                    }),
+            );
         }
         res
     }
@@ -107,7 +108,6 @@ impl Localizer {
         let mut res = vec![];
         for y in (search.y)..(search.y + search.h as i32) {
             for x in (search.x)..(search.x + search.w as i32) {
-                // println!("Searching for landmark at {x}, {y}");
                 let present = landmark.present(image, (x as u32, y as u32));
 
                 if present {

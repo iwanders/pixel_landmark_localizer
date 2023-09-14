@@ -43,7 +43,7 @@ fn find_match(block: &image::RgbaImage, rect: &Rect, lm: &Landmark) -> u32 {
 }
 
 pub fn main_landmark() -> Result<(), Error> {
-    let image_path = std::path::PathBuf::from("../screenshots/Screenshot447.png");
+    let image_path = std::path::PathBuf::from("../screenshots/Screenshot446.png");
     let screenshot = image::open(&image_path)?.to_rgba8();
 
     let roi = Rect {
