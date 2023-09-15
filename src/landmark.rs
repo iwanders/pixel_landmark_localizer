@@ -43,6 +43,7 @@ impl Landmark {
         let mut pixels = vec![];
         let width = landmark.width();
         let height = landmark.height();
+
         for ly in 0..height {
             for lx in 0..width {
                 let p = &landmark.get_pixel(lx, ly);
@@ -60,6 +61,7 @@ impl Landmark {
                 })
             }
         }
+
         Landmark {
             pixels,
             pixel_difference_threshold,
@@ -102,5 +104,53 @@ impl Landmark {
     }
     pub fn height(&self) -> u32 {
         self.height
+    }
+
+    pub fn optimize_pixels_row_seq(&mut self) {
+        // We want to order by longest sequence in x direction.
+        if self.pixels.is_empty() {
+            return;
+        }
+
+        // Sort by rows.
+        let mut orig_pixels = self.pixels.clone();
+        orig_pixels.sort_by(|a, b| {
+            let a_yx = (a.offset.1, a.offset.0);
+            let b_yx = (b.offset.1, b.offset.0);
+            a_yx.cmp(&b_yx)
+        });
+
+        let mut pixel_ordering: Vec<(usize, Vec<Pixel>)> = vec![];
+        let mut current_x = u32::MAX - 1;
+        let mut current_y = u32::MAX - 1;
+
+        for a in orig_pixels.iter() {
+            if a.offset.1 == current_y && a.offset.0 == (current_x + 1) {
+                let mut el = pixel_ordering.last_mut().unwrap();
+                el.0 += 1;
+                el.1.push(*a);
+            } else {
+                pixel_ordering.push((0, vec![*a]));
+            }
+            (current_x, current_y) = a.offset;
+        }
+
+        if false {
+            println!("pixel_ordering: {pixel_ordering:?}");
+            let mut total_pixels = 0;
+            for z in pixel_ordering.iter() {
+                total_pixels += z.1.len();
+            }
+            println!("Total pixels: {total_pixels}");
+            println!("orig_pixels pixels: {}", orig_pixels.len());
+        }
+        self.pixels = pixel_ordering
+            .iter()
+            .map(|(_, pixel_vec)| pixel_vec.iter())
+            .flatten()
+            .copied()
+            .collect();
+
+        assert_eq!(self.pixels.len(), orig_pixels.len());
     }
 }

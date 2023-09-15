@@ -50,8 +50,12 @@ pub fn main_landmark() -> Result<(), Error> {
         h: 408,
     };
 
-    let lm1 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_3.png"))?;
-    let lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_4.png"))?;
+    let mut lm1 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_3.png"))?;
+    let mut lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_4.png"))?;
+
+    lm1.optimize_pixels_row_seq();
+    lm2.optimize_pixels_row_seq();
+
     let mut test_map = Map::default();
 
     let lm1 = test_map.add_landmark(lm1);
