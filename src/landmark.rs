@@ -30,6 +30,7 @@ impl Pixel {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Landmark {
     pixels: Vec<Pixel>,
+    name: Option<String>,
     pixel_difference_threshold: u16,
     width: u32,
     height: u32,
@@ -64,6 +65,7 @@ impl Landmark {
 
         Landmark {
             pixels,
+            name: None,
             pixel_difference_threshold,
             width,
             height,

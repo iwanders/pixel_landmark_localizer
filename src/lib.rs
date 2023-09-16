@@ -50,14 +50,17 @@ pub fn main_landmark() -> Result<(), Error> {
         h: 408,
     };
 
-    let mut lm1 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_3.png"))?;
-    let mut lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_4.png"))?;
+    let mut lm0 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_1.png"))?;
+    let mut lm1 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_2.png"))?;
+    let mut lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_5.png"))?;
 
+    lm0.optimize_pixels_row_seq();
     lm1.optimize_pixels_row_seq();
     lm2.optimize_pixels_row_seq();
 
     let mut test_map = Map::default();
 
+    let lm0 = test_map.add_landmark(lm0);
     let lm1 = test_map.add_landmark(lm1);
     let lm2 = test_map.add_landmark(lm2);
 
@@ -65,45 +68,57 @@ pub fn main_landmark() -> Result<(), Error> {
     // test_map.add_fixed(Coordinate{x: 100, y: 100}, lm1);
 
     // test_map.add_fixed(Coordinate{x: 0, y: 0}, lm1);
+    // test_map.add_fixed(Coordinate { x: -45, y: -36 }, lm0);
+    // test_map.add_fixed(Coordinate { x: -103, y: -45 }, lm1);
     test_map.add_fixed(Coordinate { x: -58, y: -9 }, lm2);
 
     let mut localizer = Localizer::new(test_map, Default::default(), Default::default());
 
-    let mut _capture =
-        mock::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/leg_1/"))?;
-    let screenshot = _capture.next_frame()?;
+    let mut capture =
+        mock::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/leg_2/"))?;
+    let screenshot = capture.frame()?;
     localizer.relocalize(&screenshot, &roi);
     let loc = localizer.localize(&screenshot, &roi);
+
+    // let mut res = localizer.search_all(&screenshot, &roi);
+    // println!("Res: {res:?}");
+    // localizer.mapping(&screenshot, &roi);
 
     // let lm2_found = Localizer::search_landmarks(&screenshot, &roi, &lm1, 10000);
     // println!("lm2_found: {lm2_found:?}");
 
     // let image_path = std::path::PathBuf::from("../screenshots/run1/leg_1/Screenshot456.png");
     // let screenshot = image::open(&image_path)?.to_rgba8();
-    loop {
-        let screenshot = _capture.next_frame()?;
+    while capture.advance() {
+        let screenshot = capture.frame()?;
+        println!("Frame: {:?}", capture.frame_name());
         let start = std::time::Instant::now();
 
         if let Some(loc) = localizer.localize(&screenshot, &roi) {
             println!("location: {loc:?}");
+            localizer.mapping(&screenshot, &roi);
+            println!("took {}", start.elapsed().as_secs_f64());
         } else {
             let reloc = localizer.relocalize(&screenshot, &roi);
             println!("   reloc: {reloc:?}");
         }
-        println!("took {}", start.elapsed().as_secs_f64());
+        // let mut res = localizer.search_all(&screenshot, &roi);
+        // println!("Res: {res:?}");
     }
 
-    let start = std::time::Instant::now();
-    let loc = localizer.localize(&screenshot, &roi);
-    println!("location: {loc:?}");
+    // let start = std::time::Instant::now();
+    // let loc = localizer.localize(&screenshot, &roi);
+    // println!("location: {loc:?}");
 
-    println!("took {}", start.elapsed().as_secs_f64());
+    // println!("took {}", start.elapsed().as_secs_f64());
 
-    let mut res = localizer.search_all(&screenshot, &roi);
-    println!("Res: {res:?}");
+    // let mut res = localizer.search_all(&screenshot, &roi);
+    // println!("Res: {res:?}");
 
-    localizer.map(&screenshot, &roi);
+    // localizer.mapping(&screenshot, &roi);
     // println!("localizer: {localizer:?}");
+
+    println!("Map: {:#?}", localizer.map().locations());
 
     // let best = find_match(, test_map.landmark(lm2));
 

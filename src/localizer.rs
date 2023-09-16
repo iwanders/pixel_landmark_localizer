@@ -117,7 +117,7 @@ impl Localizer {
         None
     }
 
-    pub fn map<T: image::GenericImageView<Pixel = Rgba<u8>>>(&mut self, image: &T, roi: &Rect) {
+    pub fn mapping<T: image::GenericImageView<Pixel = Rgba<u8>>>(&mut self, image: &T, roi: &Rect) {
         let all_matches = self.search_all(image, roi);
         let mut to_insert = vec![];
         {
@@ -128,6 +128,7 @@ impl Localizer {
                 }
             }
         }
+        println!("Inserting: {to_insert:?}");
 
         for m in to_insert {
             self.map.add_fixed(m.location, m.id);
@@ -191,5 +192,9 @@ impl Localizer {
     /// Set the current position of the localizer.
     pub fn set_position(&mut self, position: Coordinate) {
         self.position = position;
+    }
+
+    pub fn map(&self) -> &Map {
+        &self.map
     }
 }
