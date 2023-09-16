@@ -24,7 +24,7 @@ pub struct LocalizerConfig {
 
 impl Default for LocalizerConfig {
     fn default() -> LocalizerConfig {
-        LocalizerConfig { search_box: 25 }
+        LocalizerConfig { search_box: 55 }
     }
 }
 
