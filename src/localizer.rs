@@ -99,19 +99,16 @@ impl Localizer {
             // println!("expected: {:?} at {screen_expected_pos:?}", loc.id);
 
             // Before doing a search box, lets try to see if the landmark is present where we expect
-            // it.
+            // it, based on the previously found landmark.
             if let Some(screen_coord) = {
                 if let Some(past_found) = offsets.first() {
-                    // println!("offsets: {offsets:?}");
                     let map_location = self.map.location(past_found.1);
                     let best_pos = map_location.location - past_found.0 .0;
                     let screen_expected_pos = loc.location - best_pos;
-                    // println!("offset expected: {:?} at {screen_expected_pos:?}", loc.id);
                     if landmark.present(
                         image,
                         (screen_expected_pos.x as u32, screen_expected_pos.y as u32),
                     ) {
-                        // println!("offset expected, found landmark");
                         Some(ScreenCoordinate(screen_expected_pos))
                         // None
                     } else {
@@ -123,6 +120,7 @@ impl Localizer {
             } {
                 offsets.push((screen_coord, location));
             } else {
+                // We didn't find it where we expect it based on past things.
                 let search_box = Rect {
                     x: (screen_expected_pos.x - self.config.search_box as i32).max(0),
                     y: (screen_expected_pos.y - self.config.search_box as i32).max(0),
@@ -130,13 +128,11 @@ impl Localizer {
                     h: 2 * self.config.search_box,
                 };
                 if let Some(found_pos) = Self::search_landmark(image, &search_box, landmark) {
-                    println!("Found expected: {:?} at {found_pos:?}", loc.id);
                     offsets.push((found_pos, location));
                 }
             }
         }
 
-        // println!("offsets: {offsets:#?}");
         if let Some(found) = offsets.first() {
             let map_location = self.map.location(found.1);
             self.position = map_location.location - found.0 .0;

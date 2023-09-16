@@ -68,8 +68,8 @@ pub fn main_landmark() -> Result<(), Error> {
     // test_map.add_fixed(Coordinate{x: 100, y: 100}, lm1);
 
     // test_map.add_fixed(Coordinate{x: 0, y: 0}, lm1);
-    // test_map.add_fixed(Coordinate { x: -45, y: -36 }, lm0);
-    // test_map.add_fixed(Coordinate { x: -103, y: -45 }, lm1);
+    test_map.add_fixed(Coordinate { x: -45, y: -36 }, lm0);
+    test_map.add_fixed(Coordinate { x: -103, y: -45 }, lm1);
     test_map.add_fixed(Coordinate { x: -58, y: -9 }, lm2);
 
     let mut localizer = Localizer::new(test_map, Default::default(), Default::default());
@@ -96,7 +96,7 @@ pub fn main_landmark() -> Result<(), Error> {
 
         if let Some(loc) = localizer.localize(&screenshot, &roi) {
             println!("location: {loc:?}");
-            localizer.mapping(&screenshot, &roi);
+            // localizer.mapping(&screenshot, &roi);
             println!("took {}", start.elapsed().as_secs_f64());
         } else {
             let reloc = localizer.relocalize(&screenshot, &roi);
