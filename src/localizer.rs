@@ -3,6 +3,7 @@ use crate::map::Map;
 use crate::Coordinate;
 use crate::Landmark;
 use crate::Rect;
+use image::Rgba;
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct Localizer {
@@ -41,7 +42,11 @@ impl Localizer {
 
     /// Do a fresh relocalisation, doing a full search on the screen and setting the position based
     /// on the known location of any found landmark.
-    pub fn relocalize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Option<Coordinate> {
+    pub fn relocalize<T: image::GenericImageView<Pixel = Rgba<u8>>>(
+        &mut self,
+        image: &T,
+        roi: &Rect,
+    ) -> Option<Coordinate> {
         let initial = self.search_all(image, roi);
 
         let mut potential_locations = vec![];
@@ -73,7 +78,11 @@ impl Localizer {
     }
 
     /// Localize relative to the previous position, searching around expected landmarks.
-    pub fn localize(&mut self, image: &image::RgbaImage, roi: &Rect) -> Option<Coordinate> {
+    pub fn localize<T: image::GenericImageView<Pixel = Rgba<u8>>>(
+        &mut self,
+        image: &T,
+        roi: &Rect,
+    ) -> Option<Coordinate> {
         // Determine the expected landmarks in the roi in map frame.
         let map_roi = *roi + self.position;
 
@@ -108,7 +117,7 @@ impl Localizer {
         None
     }
 
-    pub fn map(&mut self, image: &image::RgbaImage, roi: &Rect) {
+    pub fn map<T: image::GenericImageView<Pixel = Rgba<u8>>>(&mut self, image: &T, roi: &Rect) {
         let all_matches = self.search_all(image, roi);
         let mut to_insert = vec![];
         {
@@ -126,7 +135,11 @@ impl Localizer {
     }
 
     /// Search all landmarks in the current screen, using the current position.
-    pub fn search_all(&self, image: &image::RgbaImage, roi: &Rect) -> Vec<LandmarkLocation> {
+    pub fn search_all<T: image::GenericImageView<Pixel = Rgba<u8>>>(
+        &self,
+        image: &T,
+        roi: &Rect,
+    ) -> Vec<LandmarkLocation> {
         let mut res = vec![];
         for id in self.map.landmark_ids() {
             let landmark = self.map.landmark(id);
@@ -143,8 +156,8 @@ impl Localizer {
     }
 
     /// Search a landmark in the image, terminating if one is found.
-    pub fn search_landmark(
-        image: &image::RgbaImage,
+    pub fn search_landmark<T: image::GenericImageView<Pixel = Rgba<u8>>>(
+        image: &T,
         search: &Rect,
         landmark: &Landmark,
     ) -> Option<ScreenCoordinate> {
@@ -153,8 +166,8 @@ impl Localizer {
     }
 
     /// Search a landmark in the image, using the provided search box and limiting the search.
-    pub fn search_landmarks(
-        image: &image::RgbaImage,
+    pub fn search_landmarks<T: image::GenericImageView<Pixel = Rgba<u8>>>(
+        image: &T,
         search: &Rect,
         landmark: &Landmark,
         limit: usize,
