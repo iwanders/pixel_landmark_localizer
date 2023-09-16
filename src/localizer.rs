@@ -174,17 +174,17 @@ impl Localizer {
         limit: usize,
     ) -> Vec<ScreenCoordinate> {
         let mut res = vec![];
-        for y in (search.y)..(search.y + search.h as i32) {
-            for x in (search.x)..(search.x + search.w as i32) {
-                let present = landmark.present(image, (x as u32, y as u32));
+        for coordinate in search.spiral() {
+            let Coordinate{x, y} = coordinate;
+            let present = landmark.present(image, (x as u32, y as u32));
 
-                if present {
-                    res.push(ScreenCoordinate(Coordinate { x, y }));
-                    if res.len() >= limit {
-                        return res;
-                    }
+            if present {
+                res.push(ScreenCoordinate(Coordinate { x, y }));
+                if res.len() >= limit {
+                    return res;
                 }
             }
+            
         }
         res
     }
