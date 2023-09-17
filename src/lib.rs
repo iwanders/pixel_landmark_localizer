@@ -85,7 +85,10 @@ pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
         };
 
         if let Some(loc) = localizer.localize(&screenshot, &roi) {
-            println!("location: {loc:?}");
+            println!(
+                "location: {:?} with {} landmarks",
+                loc.position, loc.consistent_count
+            );
             // localizer.mapping(&screenshot, &roi);
             println!("took {}", start.elapsed().as_secs_f64());
         } else {
@@ -167,7 +170,10 @@ pub fn main_landmark() -> Result<(), Error> {
         let start = std::time::Instant::now();
 
         if let Some(loc) = localizer.localize(&screenshot, &roi) {
-            println!("location: {loc:?}");
+            println!(
+                "location: {:?} with {} landmarks",
+                loc.position, loc.consistent_count
+            );
             // localizer.mapping(&screenshot, &roi);
             println!("took {}", start.elapsed().as_secs_f64());
         } else {
