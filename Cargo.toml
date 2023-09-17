@@ -9,7 +9,7 @@ license = "BSD-3-Clause"
 [dependencies]
 image = { version = "0.24.6"}
 
-screen_capture = { git = "https://github.com/iwanders/displaylight_rs", rev="c55935d9feb85b4e4f9efddfe879704afadb8e57" }
+screen_capture = { git = "https://github.com/iwanders/displaylight_rs", rev="525072ef5e280063542395e1ee2664b1f555d5d4" }
 
 
 
