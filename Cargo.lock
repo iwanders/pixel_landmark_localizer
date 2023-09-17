@@ -238,15 +238,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "isometric_localizer"
-version = "0.1.0"
-dependencies = [
- "image",
- "rand_xoshiro",
- "screen_capture",
-]
-
-[[package]]
 name = "jpeg-decoder"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -384,6 +375,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "pixel_landmark_localizer"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "rand_xoshiro",
+ "screen_capture",
 ]
 
 [[package]]
