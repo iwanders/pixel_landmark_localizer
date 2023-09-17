@@ -72,6 +72,12 @@ impl Landmark {
         }
     }
 
+    pub fn from_path(path: &std::path::Path) -> Result<Landmark, crate::Error> {
+        // let image_path = std::path::PathBuf::from("../screenshots/landmark_3.png");
+        let l1 = image::open(&path)?.to_rgba8();
+        Ok(Self::from_image(&l1, 6))
+    }
+
     pub fn present<T: image::GenericImageView<Pixel = Rgba<u8>>>(
         &self,
         img: &T,

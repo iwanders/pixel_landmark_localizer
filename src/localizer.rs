@@ -6,6 +6,7 @@ use crate::Landmark;
 use crate::Rect;
 use image::Rgba;
 
+/// A struct to keep track of a location against a map.
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct Localizer {
     /// Position is the location of the top left corner of the screen.
@@ -18,8 +19,10 @@ pub struct Localizer {
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub struct ScreenCoordinate(pub Coordinate);
 
+/// Configuration for the localizer.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct LocalizerConfig {
+    /// Amount to search around the expected value. Width of the box searched is 2*search_box.
     pub search_box: u32,
 }
 
@@ -30,6 +33,7 @@ impl Default for LocalizerConfig {
 }
 
 impl Localizer {
+    /// Create a new localizer using the provided map, initial position and configuration.
     pub fn new(map: Map, position: Coordinate, config: LocalizerConfig) -> Self {
         Localizer {
             position,
@@ -42,7 +46,8 @@ impl Localizer {
     // map -> screen: screen - self.position
 
     /// Do a fresh relocalisation, doing a full search on the screen and setting the position based
-    /// on the known location of any found landmark.
+    /// on the known location of any found landmark. Usually, this is performed if localisation is
+    /// lost.
     pub fn relocalize<T: image::GenericImageView<Pixel = Rgba<u8>>>(
         &mut self,
         image: &T,
@@ -141,6 +146,8 @@ impl Localizer {
         None
     }
 
+    /// Perform a mapping procedure, doing a full search for all landmarks in the provided image and
+    /// adding any locations that are not yet in the map.
     pub fn mapping<T: image::GenericImageView<Pixel = Rgba<u8>>>(&mut self, image: &T, roi: &Rect) {
         let all_matches = self.search_all(image, roi);
         let mut to_insert = vec![];
@@ -218,6 +225,7 @@ impl Localizer {
         self.position = position;
     }
 
+    /// Return the current map.
     pub fn map(&self) -> &Map {
         &self.map
     }

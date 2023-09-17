@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+
+/// Something to mock the screen_capture module.
 pub struct MockScreenCapture {
     files: Vec<std::path::PathBuf>,
     index: usize,
