@@ -96,25 +96,24 @@ impl Localizer {
         let expected_locations = self.map.landmarks_in(&map_roi);
 
         // Then, try to find the expected landmarks in the image.
-        let mut offsets: Vec<(ScreenCoordinate, LocationId)> = vec![];
+        let mut offsets: Vec<(ScreenCoordinate, &LandmarkLocation, Coordinate)> = vec![];
         for location in expected_locations {
             let loc = self.map.location(location);
             let landmark = self.map.landmark(loc.id);
             let screen_expected_pos = loc.location - self.position;
-            // println!("expected: {:?} at {screen_expected_pos:?}", loc.id);
 
             // Before doing a search box, lets try to see if the landmark is present where we expect
             // it, based on the previously found landmark.
-            if let Some(screen_coord) = {
-                if let Some(past_found) = offsets.first() {
-                    let map_location = self.map.location(past_found.1);
-                    let best_pos = map_location.location - past_found.0 .0;
+            if let Some((screen_coord, best_pos)) = {
+                if let Some((past_found_loc, map_location, best_pos)) = offsets.first() {
+                    // let map_location = self.map.location(past_found.1);
+                    let best_pos = map_location.location - past_found_loc.0;
                     let screen_expected_pos = loc.location - best_pos;
                     if landmark.present(
                         image,
                         (screen_expected_pos.x as u32, screen_expected_pos.y as u32),
                     ) {
-                        Some(ScreenCoordinate(screen_expected_pos))
+                        Some((ScreenCoordinate(screen_expected_pos), best_pos))
                         // None
                     } else {
                         None
@@ -123,7 +122,7 @@ impl Localizer {
                     None
                 }
             } {
-                offsets.push((screen_coord, location));
+                offsets.push((screen_coord, loc, best_pos));
             } else {
                 // We didn't find it where we expect it based on past things.
                 let search_box = Rect {
@@ -133,14 +132,17 @@ impl Localizer {
                     h: 2 * self.config.search_box,
                 };
                 if let Some(found_pos) = Self::search_landmark(image, &search_box, landmark) {
-                    offsets.push((found_pos, location));
+                    let best_pos = loc.location - found_pos.0;
+                    offsets.push((found_pos, loc, best_pos));
                 }
             }
         }
 
-        if let Some(found) = offsets.first() {
-            let map_location = self.map.location(found.1);
-            self.position = map_location.location - found.0 .0;
+        // println!("offsets: {offsets:?}");
+
+        if let Some((found_pos, map_location, best_pos)) = offsets.first() {
+            // let map_location = self.map.location(found.1);
+            self.position = *best_pos;
             return Some(self.position);
         }
         None
