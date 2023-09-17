@@ -75,7 +75,7 @@ impl Localizer {
         potential_locations.sort_by(|a, b| a.0.cmp(&b.0));
         // println!("potential_locations: {potential_locations:#?}");
 
-        if let Some((_, loc, _, correction)) = potential_locations.first() {
+        if let Some((_, _, _, correction)) = potential_locations.first() {
             self.set_position(self.position - *correction);
             Some(self.position)
         } else {

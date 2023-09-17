@@ -54,7 +54,7 @@ pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
     let mut localizer = localizer;
 
     let current_resolution = capture.get_resolution();
-    if (std::env::consts::OS == "windows") {
+    if std::env::consts::OS == "windows" {
         capture.prepare_capture(0, 0, 0, current_resolution.width, current_resolution.height);
     } else {
         capture.prepare_capture(
@@ -70,7 +70,7 @@ pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
         let res = capture.capture_image();
 
         if !res {
-            std::thread::sleep_ms(100);
+            std::thread::sleep(std::time::Duration::from_millis(100));
             continue;
         }
 
@@ -92,16 +92,14 @@ pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
             let reloc = localizer.relocalize(&screenshot, &roi);
             println!("   reloc: {reloc:?}");
         }
-        std::thread::sleep_ms(50);
+        std::thread::sleep(std::time::Duration::from_millis(50));
     }
-
-    Ok(())
 }
 
 pub fn main_on_capture() -> Result<(), Error> {
     let roi = test_roi();
     let test_map = test_map()?;
-    let mut localizer = Localizer::new(test_map, Default::default(), Default::default());
+    let localizer = Localizer::new(test_map, Default::default(), Default::default());
 
     return run_on_capture(localizer, roi);
 }
@@ -161,7 +159,7 @@ pub fn main_landmark() -> Result<(), Error> {
         mock::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/"))?;
     let screenshot = capture.frame()?;
     localizer.relocalize(&screenshot, &roi);
-    let loc = localizer.localize(&screenshot, &roi);
+    // localizer.localize(&screenshot, &roi);
 
     while capture.advance() {
         let screenshot = capture.frame()?;

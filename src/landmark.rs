@@ -134,7 +134,7 @@ impl Landmark {
 
         for a in orig_pixels.iter() {
             if a.offset.1 == current_y && a.offset.0 == (current_x + 1) {
-                let mut el = pixel_ordering.last_mut().unwrap();
+                let el = pixel_ordering.last_mut().unwrap();
                 el.0 += 1;
                 el.1.push(*a);
             } else {
