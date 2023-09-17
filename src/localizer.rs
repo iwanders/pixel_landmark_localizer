@@ -1,5 +1,4 @@
 use crate::map::LandmarkLocation;
-use crate::map::LocationId;
 use crate::map::Map;
 use crate::Coordinate;
 use crate::Landmark;
@@ -59,6 +58,28 @@ impl Localizer {
     // screen -> map: screen + self.position.
     // map -> screen: screen - self.position
 
+    fn matches_to_localisation_result(matches: &[LandmarkMatch]) -> Option<LocalisationResult> {
+        if matches.is_empty() {
+            return None;
+        }
+
+        // Determine the coordinate for which the most landmarks agree;
+        use std::collections::HashMap;
+        let mut position_count: HashMap<Coordinate, usize> = HashMap::new();
+        for LandmarkMatch { best_position, .. } in matches.iter() {
+            *position_count.entry(*best_position).or_default() += 1;
+        }
+
+        let (position, consistent_count) =
+            position_count.into_iter().max_by_key(|(_, v)| *v).unwrap();
+
+        Some(LocalisationResult {
+            matches: matches.to_vec(),
+            position,
+            consistent_count,
+        })
+    }
+
     /// Do a fresh relocalisation, doing a full search on the screen and setting the position based
     /// on the known location of any found landmark. Usually, this is performed if localisation is
     /// lost.
@@ -66,35 +87,32 @@ impl Localizer {
         &mut self,
         image: &T,
         roi: &Rect,
-    ) -> Option<Coordinate> {
-        let initial = self.search_all(image, roi);
+    ) -> Option<LocalisationResult> {
+        let landmark_matches = self.search_all(image, roi);
 
-        let mut potential_locations = vec![];
-        for loc in initial {
+        // let mut potential_locations = vec![];
+        let mut matches: Vec<LandmarkMatch> = vec![];
+        for (location, screen_position) in landmark_matches {
             // we found this landmark, see where it exists on the map.
-            let candidates = self.map.locations_by_landmark(loc.id);
+            let candidates = self.map.locations_by_landmark(location.id);
 
             for candidate in candidates {
-                let estimated_correction = loc.location - candidate.location;
-                potential_locations.push((
-                    estimated_correction.dist_sq(),
-                    loc,
-                    candidate.clone(),
-                    estimated_correction,
-                ));
+                let estimated_correction = location.location - candidate.location;
+                let best_position = self.position - estimated_correction;
+
+                matches.push(LandmarkMatch {
+                    screen_position,
+                    location,
+                    best_position,
+                });
             }
         }
 
-        // Sort by lowest estimated correction, and use that value.
-        potential_locations.sort_by(|a, b| a.0.cmp(&b.0));
-        // println!("potential_locations: {potential_locations:#?}");
-
-        if let Some((_, _, _, correction)) = potential_locations.first() {
-            self.set_position(self.position - *correction);
-            Some(self.position)
-        } else {
-            None
+        let res = Self::matches_to_localisation_result(&matches);
+        if let Some(loc_res) = &res {
+            self.position = loc_res.position;
         }
+        res
     }
 
     /// Localize relative to the previous position, searching around expected landmarks.
@@ -158,27 +176,11 @@ impl Localizer {
             }
         }
 
-        // If we found no landmarks at all, return an empty optional.
-        if matches.is_empty() {
-            return None;
+        let res = Self::matches_to_localisation_result(&matches);
+        if let Some(loc_res) = &res {
+            self.position = loc_res.position;
         }
-
-        // Determine the coordinate for which the most landmarks agree;
-        use std::collections::HashMap;
-        let mut position_count: HashMap<Coordinate, usize> = HashMap::new();
-        for LandmarkMatch { best_position, .. } in matches.iter() {
-            *position_count.entry(*best_position).or_default() += 1;
-        }
-
-        let (position, consistent_count) =
-            position_count.into_iter().max_by_key(|(_, v)| *v).unwrap();
-        self.position = position;
-
-        Some(LocalisationResult {
-            matches,
-            position,
-            consistent_count,
-        })
+        res
     }
 
     /// Perform a mapping procedure, doing a full search for all landmarks in the provided image and
@@ -188,7 +190,7 @@ impl Localizer {
         let mut to_insert = vec![];
         {
             let locs = self.map.locations();
-            for m in all_matches.iter() {
+            for (m, _screen_pos) in all_matches.iter() {
                 if !locs.contains(m) {
                     to_insert.push(m);
                 }
@@ -206,16 +208,21 @@ impl Localizer {
         &self,
         image: &T,
         roi: &Rect,
-    ) -> Vec<LandmarkLocation> {
+    ) -> Vec<(LandmarkLocation, ScreenCoordinate)> {
         let mut res = vec![];
         for id in self.map.landmark_ids() {
             let landmark = self.map.landmark(id);
             res.extend(
                 Self::search_landmarks(image, roi, landmark, usize::MAX)
                     .iter()
-                    .map(|s| LandmarkLocation {
-                        location: s.0 + self.position,
-                        id,
+                    .map(|s| {
+                        (
+                            LandmarkLocation {
+                                location: s.0 + self.position,
+                                id,
+                            },
+                            *s,
+                        )
                     }),
             );
         }

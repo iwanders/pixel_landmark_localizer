@@ -161,7 +161,8 @@ pub fn main_landmark() -> Result<(), Error> {
     let mut capture =
         mock::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/"))?;
     let screenshot = capture.frame()?;
-    localizer.relocalize(&screenshot, &roi);
+    let reloc = localizer.relocalize(&screenshot, &roi);
+    println!("   reloc: {reloc:?}");
     // localizer.localize(&screenshot, &roi);
 
     while capture.advance() {
