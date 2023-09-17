@@ -42,6 +42,79 @@ fn find_match(block: &image::RgbaImage, rect: &Rect, lm: &Landmark) -> u32 {
     0
 }
 
+pub struct CaptureWrap<'a> {
+    width: usize,
+    height: usize,
+    buffer: &'a [screen_capture::RGB],
+}
+impl<'a> image::GenericImageView for CaptureWrap<'a> {
+    type Pixel = image::Rgba<u8>;
+    fn dimensions(&self) -> (u32, u32) {
+        (self.width as u32, self.height as u32)
+    }
+    fn bounds(&self) -> (u32, u32, u32, u32) {
+        (0, 0, self.width as u32, self.height as u32)
+    }
+    fn get_pixel(&self, x: u32, y: u32) -> Self::Pixel {
+        let rgb = self.buffer[y as usize * self.width + x as usize];
+        let mut res = image::Rgba::<u8>::from([0; 4]);
+        res.0[0] = rgb.r;
+        res.0[1] = rgb.g;
+        res.0[2] = rgb.b;
+        res.0[3] = 0;
+        res
+    }
+}
+
+pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
+    let mut capture = screen_capture::get_capture();
+    let mut localizer = localizer;
+
+    let current_resolution = capture.get_resolution();
+    if (std::env::consts::OS == "windows") {
+        capture.prepare_capture(0, 0, 0, current_resolution.width, current_resolution.height);
+    } else {
+        capture.prepare_capture(
+            0,
+            1920,
+            0,
+            current_resolution.width - 1920,
+            current_resolution.height,
+        );
+    }
+
+    loop {
+        let res = capture.capture_image();
+
+        if !res {
+            std::thread::sleep_ms(100);
+            continue;
+        }
+
+        // Then, we can grab the actual image.
+        let img = capture.get_image();
+
+        let start = std::time::Instant::now();
+        let screenshot = CaptureWrap {
+            width: img.get_width() as usize,
+            height: img.get_height() as usize,
+            buffer: img.get_data().unwrap(),
+        };
+
+        if let Some(loc) = localizer.localize(&screenshot, &roi) {
+            println!("location: {loc:?}");
+            // localizer.mapping(&screenshot, &roi);
+            println!("took {}", start.elapsed().as_secs_f64());
+        } else {
+            let reloc = localizer.relocalize(&screenshot, &roi);
+            println!("   reloc: {reloc:?}");
+        }
+        std::thread::sleep_ms(50);
+    }
+
+    Ok(())
+}
+
 pub fn main_landmark() -> Result<(), Error> {
     let roi = Rect {
         x: 0,
@@ -54,15 +127,23 @@ pub fn main_landmark() -> Result<(), Error> {
     let mut lm1 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_2.png"))?;
     let mut lm2 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_5.png"))?;
 
+    let mut lm3 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_3.png"))?;
+    let mut lm4 = image_to_landmark(&std::path::PathBuf::from("../screenshots/landmark_4.png"))?;
+
     lm0.optimize_pixels_row_seq();
     lm1.optimize_pixels_row_seq();
     lm2.optimize_pixels_row_seq();
+    lm3.optimize_pixels_row_seq();
+    lm4.optimize_pixels_row_seq();
 
     let mut test_map = Map::default();
 
     let lm0 = test_map.add_landmark(lm0);
     let lm1 = test_map.add_landmark(lm1);
     let lm2 = test_map.add_landmark(lm2);
+
+    let lm3 = test_map.add_landmark(lm3);
+    let lm4 = test_map.add_landmark(lm4);
 
     // add lm1 to the fixed location at the origin.
     // test_map.add_fixed(Coordinate{x: 100, y: 100}, lm1);
@@ -72,10 +153,15 @@ pub fn main_landmark() -> Result<(), Error> {
     test_map.add_fixed(Coordinate { x: -103, y: -45 }, lm1);
     test_map.add_fixed(Coordinate { x: -58, y: -9 }, lm2);
 
+    test_map.add_fixed(Coordinate { x: 1000, y: 1000 }, lm4);
+    test_map.add_fixed(Coordinate { x: 960, y: 1012 }, lm3);
+
     let mut localizer = Localizer::new(test_map, Default::default(), Default::default());
 
+    return run_on_capture(localizer, roi);
+
     let mut capture =
-        mock::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/leg_2/"))?;
+        mock::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/"))?;
     let screenshot = capture.frame()?;
     localizer.relocalize(&screenshot, &roi);
     let loc = localizer.localize(&screenshot, &roi);
