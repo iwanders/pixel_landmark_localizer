@@ -8,7 +8,7 @@ This system can work well if the image on the screen always shift by full pixels
 
 The pixels that make up a landmark can be ordered by longest row-sequence, this ensures that when a pixel is checked for the presence of a landmark, in general a quick rejection occurs. It is paramount to ensure that landmarks can't 'snap' to the wrong location, ideally their positioning is globally unique. Currently partially overlapping landmarks, for example where a pattern can snap to two locations that are close aren't handled.
 
-Since landmarks allow for transparency, they can be sparse, large and unique, ensuring high confidence in the found landmarks. Determining the location requires only scanning the current landmarks that are expected, which in general can occur in less than 0.2 milliseconds. If one landmark is found, it's best guess is used to check the presence of subsequent landmarks, which - if found - completely eliminates the grid search.
+Since landmarks allow for transparency, they can be sparse, large and unique, ensuring high confidence in the found landmarks. Determining the location requires only scanning the current landmarks that are expected, which in general can occur in less than 0.2 milliseconds. If one landmark is found, it's best guess is used to check the presence of subsequent landmarks, which - if found - completely eliminates duplicate grid searches.
 
 
 ## License

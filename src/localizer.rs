@@ -40,8 +40,11 @@ pub struct LandmarkMatch {
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct LocalisationResult {
+    /// The matches found in the image's roi.
     pub matches: Vec<LandmarkMatch>,
+    /// The position determined.
     pub position: Coordinate,
+    /// The number of landmarks found that exactly agreed on this position.
     pub consistent_count: usize,
 }
 
@@ -265,6 +268,11 @@ impl Localizer {
     /// Set the current position of the localizer.
     pub fn set_position(&mut self, position: Coordinate) {
         self.position = position;
+    }
+
+    /// Retrieve the current position.
+    pub fn position(&self) -> Coordinate {
+        self.position
     }
 
     /// Return the current map.
