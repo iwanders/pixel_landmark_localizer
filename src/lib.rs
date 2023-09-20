@@ -20,16 +20,16 @@ pub use util::{Coordinate, Rect};
 pub use landmark::Landmark;
 pub mod localizer;
 pub mod map;
-use localizer::Localizer;
+pub use localizer::Localizer;
 use map::Map;
 
 pub mod config;
 
 /// Wrapper such that we can implement GenericImageView for the RGB buffer.
 pub struct CaptureWrap<'a> {
-    width: usize,
-    height: usize,
-    buffer: &'a [screen_capture::RGB],
+    pub width: usize,
+    pub height: usize,
+    pub buffer: &'a [screen_capture::RGB],
 }
 impl<'a> image::GenericImageView for CaptureWrap<'a> {
     type Pixel = image::Rgba<u8>;
@@ -50,10 +50,8 @@ impl<'a> image::GenericImageView for CaptureWrap<'a> {
     }
 }
 
-/// Clunky function to run a localisation effort against the map.
-pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
+pub fn get_configured_capture() -> Box<dyn screen_capture::Capture> {
     let mut capture = screen_capture::get_capture();
-    let mut localizer = localizer;
 
     let current_resolution = capture.get_resolution();
     if std::env::consts::OS == "windows" {
@@ -67,7 +65,13 @@ pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
             current_resolution.height,
         );
     }
+    capture
+}
 
+/// Clunky function to run a localisation effort against the map.
+pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
+    let mut localizer = localizer;
+    let mut capture = get_configured_capture();
     loop {
         let res = capture.capture_image();
 

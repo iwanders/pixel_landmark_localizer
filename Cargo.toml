@@ -24,3 +24,8 @@ rand_xoshiro = "0.6.0"
 # Enable some optimisations, but not all of it.
 opt-level = 2
 debug = 1
+
+
+[[bin]]
+name = "map"
+path = "bin/map.rs"
