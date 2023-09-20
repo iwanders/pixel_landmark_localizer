@@ -23,6 +23,7 @@ pub mod map;
 use localizer::Localizer;
 use map::Map;
 
+pub mod config;
 
 /// Wrapper such that we can implement GenericImageView for the RGB buffer.
 pub struct CaptureWrap<'a> {
@@ -190,7 +191,11 @@ pub fn main_landmark() -> Result<(), Error> {
 }
 
 pub fn main_arg(path: &std::path::Path) -> Result<(), Error> {
+    let roi = test_roi();
     let map = config::load_map(path)?;
+    let localizer = Localizer::new(map, Default::default(), Default::default());
+
+    return run_on_capture(localizer, roi);
+
     Ok(())
 }
-

@@ -12,6 +12,8 @@ image = { version = "0.24.6"}
 screen_capture = { git = "https://github.com/iwanders/displaylight_rs", rev="525072ef5e280063542395e1ee2664b1f555d5d4" }
 
 
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
 
 
 [dev-dependencies]

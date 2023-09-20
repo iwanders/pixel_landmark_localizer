@@ -74,8 +74,20 @@ impl Landmark {
 
     pub fn from_path(path: &std::path::Path) -> Result<Landmark, crate::Error> {
         // let image_path = std::path::PathBuf::from("../screenshots/landmark_3.png");
+        if !path.is_file() {
+            return Err(crate::Error::from(format!(
+                "landmark file {path:?} not found"
+            )));
+        }
         let l1 = image::open(&path)?.to_rgba8();
-        Ok(Self::from_image(&l1, 6))
+        Ok(Self::from_image(&l1, 0))
+    }
+
+    pub fn set_pixel_difference_threshold(&mut self, value: u16) {
+        self.pixel_difference_threshold = value;
+    }
+    pub fn set_name(&mut self, value: Option<String>) {
+        self.name = value;
     }
 
     pub fn present<T: image::GenericImageView<Pixel = Rgba<u8>>>(

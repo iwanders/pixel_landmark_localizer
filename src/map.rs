@@ -29,7 +29,6 @@ pub struct Map {
 }
 
 impl Map {
-
     /// Add a landmark to this map, this just adds the pattern.
     pub fn add_landmark(&mut self, lm: Landmark) -> LandmarkId {
         let id = LandmarkId(self.landmarks.len());
