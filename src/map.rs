@@ -29,6 +29,7 @@ pub struct Map {
 }
 
 impl Map {
+
     /// Add a landmark to this map, this just adds the pattern.
     pub fn add_landmark(&mut self, lm: Landmark) -> LandmarkId {
         let id = LandmarkId(self.landmarks.len());
@@ -38,7 +39,7 @@ impl Map {
 
     /// Adds a fixed location to the map, stating the provided landmark id will be present at this
     /// location.
-    pub fn add_fixed(&mut self, location: Coordinate, id: LandmarkId) {
+    pub fn add_fixed(&mut self, id: LandmarkId, location: Coordinate) {
         self.locations.push(LandmarkLocation { location, id });
     }
 

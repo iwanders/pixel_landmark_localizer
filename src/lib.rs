@@ -23,6 +23,7 @@ pub mod map;
 use localizer::Localizer;
 use map::Map;
 
+
 /// Wrapper such that we can implement GenericImageView for the RGB buffer.
 pub struct CaptureWrap<'a> {
     width: usize,
@@ -134,12 +135,12 @@ pub fn test_map() -> Result<Map, Error> {
     // test_map.add_fixed(Coordinate{x: 100, y: 100}, lm1);
 
     // test_map.add_fixed(Coordinate{x: 0, y: 0}, lm1);
-    test_map.add_fixed(Coordinate { x: -45, y: -36 }, lm0);
-    test_map.add_fixed(Coordinate { x: -103, y: -45 }, lm1);
-    test_map.add_fixed(Coordinate { x: -58, y: -9 }, lm2);
+    test_map.add_fixed(lm0, Coordinate { x: -45, y: -36 });
+    test_map.add_fixed(lm1, Coordinate { x: -103, y: -45 });
+    test_map.add_fixed(lm2, Coordinate { x: -58, y: -9 });
 
-    test_map.add_fixed(Coordinate { x: 1000, y: 1000 }, lm4);
-    test_map.add_fixed(Coordinate { x: 960, y: 1012 }, lm3);
+    test_map.add_fixed(lm4, Coordinate { x: 1000, y: 1000 });
+    test_map.add_fixed(lm3, Coordinate { x: 960, y: 1012 });
 
     Ok(test_map)
 }
@@ -187,3 +188,9 @@ pub fn main_landmark() -> Result<(), Error> {
 
     Ok(())
 }
+
+pub fn main_arg(path: &std::path::Path) -> Result<(), Error> {
+    let map = config::load_map(path)?;
+    Ok(())
+}
+

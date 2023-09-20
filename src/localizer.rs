@@ -202,7 +202,7 @@ impl Localizer {
         println!("Inserting: {to_insert:?}");
 
         for m in to_insert {
-            self.map.add_fixed(m.location, m.id);
+            self.map.add_fixed(m.id, m.location);
         }
     }
 
