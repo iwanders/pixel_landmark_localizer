@@ -13,7 +13,7 @@ Make landmarks by:
 pub type Error = Box<dyn std::error::Error>;
 
 mod landmark;
-mod mock;
+pub mod capture;
 mod util;
 pub use util::{Coordinate, Rect};
 
@@ -25,30 +25,6 @@ use map::Map;
 
 pub mod config;
 
-/// Wrapper such that we can implement GenericImageView for the RGB buffer.
-pub struct CaptureWrap<'a> {
-    pub width: usize,
-    pub height: usize,
-    pub buffer: &'a [screen_capture::RGB],
-}
-impl<'a> image::GenericImageView for CaptureWrap<'a> {
-    type Pixel = image::Rgba<u8>;
-    fn dimensions(&self) -> (u32, u32) {
-        (self.width as u32, self.height as u32)
-    }
-    fn bounds(&self) -> (u32, u32, u32, u32) {
-        (0, 0, self.width as u32, self.height as u32)
-    }
-    fn get_pixel(&self, x: u32, y: u32) -> Self::Pixel {
-        let rgb = self.buffer[y as usize * self.width + x as usize];
-        let mut res = image::Rgba::<u8>::from([0; 4]);
-        res.0[0] = rgb.r;
-        res.0[1] = rgb.g;
-        res.0[2] = rgb.b;
-        res.0[3] = 0;
-        res
-    }
-}
 
 pub fn get_configured_capture() -> Box<dyn screen_capture::Capture> {
     let mut capture = screen_capture::get_capture();
@@ -84,7 +60,7 @@ pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
         let img = capture.get_image();
 
         let start = std::time::Instant::now();
-        let screenshot = CaptureWrap {
+        let screenshot = capture::CaptureAdaptor {
             width: img.get_width() as usize,
             height: img.get_height() as usize,
             buffer: img.get_data().unwrap(),
@@ -165,7 +141,7 @@ pub fn main_landmark() -> Result<(), Error> {
     let mut localizer = Localizer::new(test_map, Default::default(), Default::default());
 
     let mut capture =
-        mock::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/"))?;
+        capture::MockScreenCapture::new(&std::path::PathBuf::from("../screenshots/run1/"))?;
     let screenshot = capture.frame()?;
     let reloc = localizer.relocalize(&screenshot, &roi);
     println!("   reloc: {reloc:?}");

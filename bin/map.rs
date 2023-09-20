@@ -20,7 +20,7 @@ pub fn main() -> Result<(), pixel_landmark_localizer::Error> {
         let img = capture.get_image();
 
         let start = std::time::Instant::now();
-        let screenshot = pll::CaptureWrap {
+        let screenshot = pll::capture::CaptureAdaptor {
             width: img.get_width() as usize,
             height: img.get_height() as usize,
             buffer: img.get_data().unwrap(),

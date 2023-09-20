@@ -39,3 +39,32 @@ impl MockScreenCapture {
         self.index < self.files.len()
     }
 }
+
+/// Wrapper such that we can implement GenericImageView for the RGB buffer.
+pub struct CaptureAdaptor<'a> {
+    pub width: usize,
+    pub height: usize,
+    pub buffer: &'a [screen_capture::RGB],
+}
+impl<'a> image::GenericImageView for CaptureAdaptor<'a> {
+    type Pixel = image::Rgba<u8>;
+    fn dimensions(&self) -> (u32, u32) {
+        (self.width as u32, self.height as u32)
+    }
+    fn bounds(&self) -> (u32, u32, u32, u32) {
+        (0, 0, self.width as u32, self.height as u32)
+    }
+    fn get_pixel(&self, x: u32, y: u32) -> Self::Pixel {
+        let rgb = self.buffer[y as usize * self.width + x as usize];
+        let mut res = image::Rgba::<u8>::from([0; 4]);
+        res.0[0] = rgb.r;
+        res.0[1] = rgb.g;
+        res.0[2] = rgb.b;
+        res.0[3] = 0;
+        res
+    }
+}
+
+trait CaptureAdapted {
+    fn as_adapted(&self) -> CaptureAdaptor;
+}
