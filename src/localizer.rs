@@ -188,7 +188,11 @@ impl Localizer {
 
     /// Perform a mapping procedure, doing a full search for all landmarks in the provided image and
     /// adding any locations that are not yet in the map.
-    pub fn mapping<T: image::GenericImageView<Pixel = Rgba<u8>>>(&mut self, image: &T, roi: &Rect) {
+    pub fn mapping<T: image::GenericImageView<Pixel = Rgba<u8>>>(
+        &mut self,
+        image: &T,
+        roi: &Rect,
+    ) -> Vec<LandmarkLocation> {
         let all_matches = self.search_all(image, roi);
         let mut to_insert = vec![];
         {
@@ -201,9 +205,11 @@ impl Localizer {
         }
         println!("Inserting: {to_insert:?}");
 
+        let mut v = vec![];
         for m in to_insert {
-            self.map.add_fixed(m.id, m.location);
+            v.push(self.map.add_fixed(m.id, m.location))
         }
+        v
     }
 
     /// Search all landmarks in the current screen, using the current position.

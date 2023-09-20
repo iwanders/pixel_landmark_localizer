@@ -1,4 +1,5 @@
 use pixel_landmark_localizer as pll;
+use pixel_landmark_localizer::CaptureAdapted;
 
 pub fn main() -> Result<(), pixel_landmark_localizer::Error> {
     let path = &std::path::PathBuf::from(std::env::args().nth(1).expect("should have argument"));
@@ -17,24 +18,22 @@ pub fn main() -> Result<(), pixel_landmark_localizer::Error> {
         }
 
         // Then, we can grab the actual image.
-        let img = capture.get_image();
+        let screenshot = capture.get_image();
 
         let start = std::time::Instant::now();
-        let screenshot = pll::capture::CaptureAdaptor {
-            width: img.get_width() as usize,
-            height: img.get_height() as usize,
-            buffer: img.get_data().unwrap(),
-        };
 
-        if let Some(loc) = localizer.localize(&screenshot, &roi) {
+        if let Some(loc) = localizer.localize(&screenshot.as_adapted(), &roi) {
             println!(
                 "location: {:?} with {} landmarks",
                 loc.position, loc.consistent_count
             );
-            localizer.mapping(&screenshot, &roi);
+            let r = localizer.mapping(&screenshot.as_adapted(), &roi);
+            for loc in r {
+                println!("New location: {loc:?}");
+            }
             println!("took {}", start.elapsed().as_secs_f64());
         } else {
-            let reloc = localizer.relocalize(&screenshot, &roi);
+            let reloc = localizer.relocalize(&screenshot.as_adapted(), &roi);
             println!("   reloc: {reloc:?}");
         }
         std::thread::sleep(std::time::Duration::from_millis(50));

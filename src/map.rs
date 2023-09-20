@@ -38,8 +38,10 @@ impl Map {
 
     /// Adds a fixed location to the map, stating the provided landmark id will be present at this
     /// location.
-    pub fn add_fixed(&mut self, id: LandmarkId, location: Coordinate) {
-        self.locations.push(LandmarkLocation { location, id });
+    pub fn add_fixed(&mut self, id: LandmarkId, location: Coordinate) -> LandmarkLocation {
+        let r = LandmarkLocation { location, id };
+        self.locations.push(r);
+        r
     }
 
     /// Return the locations that can be found within a certain rectangle (map coordinates).

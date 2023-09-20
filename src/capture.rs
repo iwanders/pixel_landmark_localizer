@@ -65,6 +65,16 @@ impl<'a> image::GenericImageView for CaptureAdaptor<'a> {
     }
 }
 
-trait CaptureAdapted {
+pub trait CaptureAdapted {
     fn as_adapted(&self) -> CaptureAdaptor;
+}
+
+impl CaptureAdapted for Box<dyn screen_capture::Image> {
+    fn as_adapted(&self) -> CaptureAdaptor {
+        CaptureAdaptor {
+            width: self.get_width() as usize,
+            height: self.get_height() as usize,
+            buffer: self.get_data().unwrap(),
+        }
+    }
 }

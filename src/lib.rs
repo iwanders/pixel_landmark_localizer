@@ -12,8 +12,9 @@ Make landmarks by:
 
 pub type Error = Box<dyn std::error::Error>;
 
-mod landmark;
 pub mod capture;
+mod landmark;
+pub use capture::CaptureAdapted;
 mod util;
 pub use util::{Coordinate, Rect};
 
@@ -24,7 +25,6 @@ pub use localizer::Localizer;
 use map::Map;
 
 pub mod config;
-
 
 pub fn get_configured_capture() -> Box<dyn screen_capture::Capture> {
     let mut capture = screen_capture::get_capture();
@@ -57,16 +57,11 @@ pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
         }
 
         // Then, we can grab the actual image.
-        let img = capture.get_image();
+        let screenshot = capture.get_image();
 
         let start = std::time::Instant::now();
-        let screenshot = capture::CaptureAdaptor {
-            width: img.get_width() as usize,
-            height: img.get_height() as usize,
-            buffer: img.get_data().unwrap(),
-        };
 
-        if let Some(loc) = localizer.localize(&screenshot, &roi) {
+        if let Some(loc) = localizer.localize(&screenshot.as_adapted(), &roi) {
             println!(
                 "location: {:?} with {} landmarks",
                 loc.position, loc.consistent_count
@@ -74,7 +69,7 @@ pub fn run_on_capture(localizer: Localizer, roi: Rect) -> Result<(), Error> {
             // localizer.mapping(&screenshot, &roi);
             println!("took {}", start.elapsed().as_secs_f64());
         } else {
-            let reloc = localizer.relocalize(&screenshot, &roi);
+            let reloc = localizer.relocalize(&screenshot.as_adapted(), &roi);
             println!("   reloc: {reloc:?}");
         }
         std::thread::sleep(std::time::Duration::from_millis(50));
