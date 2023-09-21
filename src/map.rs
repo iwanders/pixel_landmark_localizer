@@ -6,6 +6,12 @@ use crate::Coordinate;
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct LandmarkId(usize);
 
+impl LandmarkId {
+    pub fn to_index(&self) -> usize {
+        self.0
+    }
+}
+
 impl std::fmt::Display for LandmarkId {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "landmark_{}", self.0)

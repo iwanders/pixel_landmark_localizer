@@ -86,9 +86,10 @@ impl Landmark {
     pub fn to_rgba(&self) -> image::RgbaImage {
         let mut image = image::RgbaImage::from_pixel(self.width, self.height, image::Rgba([0; 4]));
         for p in self.pixels.iter() {
-            *image.get_pixel_mut(p.offset.0, p.offset.1) = image::Rgba([p.rgb.r, p.rgb.g, p.rgb.b, 255 ]);
+            *image.get_pixel_mut(p.offset.0, p.offset.1) =
+                image::Rgba([p.rgb.r, p.rgb.g, p.rgb.b, 255]);
         }
-        
+
         image
     }
 
