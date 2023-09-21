@@ -126,6 +126,10 @@ impl Landmark {
         self.height
     }
 
+    pub fn name(&self) -> Option<String> {
+        self.name.clone()
+    }
+
     pub fn optimize_pixels_row_seq(&mut self) {
         // We want to order by longest sequence in x direction.
         if self.pixels.is_empty() {

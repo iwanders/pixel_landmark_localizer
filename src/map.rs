@@ -6,6 +6,12 @@ use crate::Coordinate;
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct LandmarkId(usize);
 
+impl std::fmt::Display for LandmarkId {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "landmark_{}", self.0)
+    }
+}
+
 /// Id for a particular location on the map, so landmark id & position.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct LocationId(usize);
@@ -22,6 +28,8 @@ pub struct LandmarkLocation {
 /// Something to describe a map of landmarks.
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct Map {
+    /// An optional name for this map.
+    name: Option<String>,
     /// The landmarks known by this map.
     landmarks: Vec<Landmark>,
     /// The placement of these landmarks on the map.
@@ -75,12 +83,21 @@ impl Map {
     }
 
     /// Return a landmark by id.
-    pub fn landmark(&self, id: LandmarkId) -> &Landmark {
+    pub fn landmark(&self, id: &LandmarkId) -> &Landmark {
         &self.landmarks[id.0]
     }
 
     /// Return all landmark ids.
     pub fn landmark_ids(&self) -> Vec<LandmarkId> {
         (0..self.landmarks.len()).map(|i| LandmarkId(i)).collect()
+    }
+
+    /// Set the map's name
+    pub fn set_name(&mut self, name: Option<String>) {
+        self.name = name;
+    }
+
+    pub fn name(&self) -> Option<String> {
+        self.name.clone()
     }
 }

@@ -26,9 +26,28 @@ pub struct LandmarkSpecification {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 struct MapSpecification {
-    pub name: String,
+    pub name: Option<String>,
     pub landmarks: Vec<String>,
     pub locations: Vec<(String, [i32; 2])>,
+}
+
+impl MapSpecification {
+    pub fn from_map(map: &crate::Map) -> Self {
+        let name = map.name();
+        let get_landmark_name = |lm| map.landmark(lm).name().unwrap_or(format!("{}", lm));
+        let landmark_ids = map.landmark_ids();
+        let landmarks = landmark_ids.iter().map(get_landmark_name).collect();
+        let locations = map
+            .locations()
+            .iter()
+            .map(|loc| (get_landmark_name(&loc.id), [loc.location.x, loc.location.y]))
+            .collect();
+        MapSpecification {
+            name,
+            landmarks,
+            locations,
+        }
+    }
 }
 
 use std::fs::File;
@@ -61,6 +80,7 @@ pub fn load_map(path: &std::path::Path) -> Result<crate::Map, crate::Error> {
     let map_spec = read_deserializable::<MapSpecification>(path)?;
     let mut map = crate::Map::default();
 
+    map.set_name(map_spec.name);
     let mut landmark_map = std::collections::HashMap::new();
 
     for landmark_name in map_spec.landmarks.iter() {
@@ -102,4 +122,16 @@ pub fn load_map(path: &std::path::Path) -> Result<crate::Map, crate::Error> {
     }
 
     Ok(map)
+}
+
+pub fn save_map_string(map: &crate::Map) -> Result<String, crate::Error> {
+    let map_spec = MapSpecification::from_map(map);
+    Ok(serde_yaml::to_string(&map_spec)?)
+}
+
+pub fn save_map(path: &std::path::Path, map: &crate::Map) -> Result<(), crate::Error> {
+    use std::io::Write;
+    let mut file = std::fs::File::create(path)?;
+    file.write_all(save_map_string(map)?.as_bytes())?;
+    Ok(())
 }

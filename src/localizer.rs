@@ -134,7 +134,7 @@ impl Localizer {
         let mut matches: Vec<LandmarkMatch> = vec![];
         for location in expected_locations {
             let loc = self.map.location(location);
-            let landmark = self.map.landmark(loc.id);
+            let landmark = self.map.landmark(&loc.id);
             let screen_expected_pos = loc.location - self.position;
 
             // Before doing a search box, lets try to see if the landmark is present where we expect
@@ -220,7 +220,7 @@ impl Localizer {
     ) -> Vec<(LandmarkLocation, ScreenCoordinate)> {
         let mut res = vec![];
         for id in self.map.landmark_ids() {
-            let landmark = self.map.landmark(id);
+            let landmark = self.map.landmark(&id);
             res.extend(
                 Self::search_landmarks(image, roi, landmark, usize::MAX)
                     .iter()
