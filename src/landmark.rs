@@ -83,6 +83,15 @@ impl Landmark {
         Ok(Self::from_image(&l1, 0))
     }
 
+    pub fn to_rgba(&self) -> image::RgbaImage {
+        let mut image = image::RgbaImage::from_pixel(self.width, self.height, image::Rgba([0; 4]));
+        for p in self.pixels.iter() {
+            *image.get_pixel_mut(p.offset.0, p.offset.1) = image::Rgba([p.rgb.r, p.rgb.g, p.rgb.b, 255 ]);
+        }
+        
+        image
+    }
+
     pub fn set_pixel_difference_threshold(&mut self, value: u16) {
         self.pixel_difference_threshold = value;
     }
