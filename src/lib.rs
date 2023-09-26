@@ -170,7 +170,5 @@ pub fn main_arg(path: &std::path::Path) -> Result<(), Error> {
     let map = config::load_map(path)?;
     let localizer = Localizer::new(map, Default::default(), Default::default());
 
-    return run_on_capture(localizer, roi);
-
-    Ok(())
+    run_on_capture(localizer, roi)
 }

@@ -20,6 +20,10 @@ struct Args {
     /// Whether or not to search for all landmarks each frame.
     #[arg(long, short, default_value = "false")]
     mapping: bool,
+
+    /// Path to read the capture configuration from.
+    #[arg(long, short)]
+    capture_config: Option<String>,
 }
 
 pub fn main() -> Result<(), pixel_landmark_localizer::Error> {
@@ -40,11 +44,15 @@ pub fn main() -> Result<(), pixel_landmark_localizer::Error> {
     let localizer = pll::Localizer::new(map, Default::default(), Default::default());
 
     let mut localizer = localizer;
-    let mut capture = pixel_landmark_localizer::get_configured_capture();
 
-    let capture_config = pll::config::read_deserializable::<pll::capture::Config>(
-        &std::path::PathBuf::from("config").join(format!("{}.yaml", std::env::consts::OS)),
-    )?;
+    let capture_config_path = if let Some(capture_config) = args.capture_config {
+        std::path::PathBuf::from(capture_config)
+    } else {
+        std::path::PathBuf::from("config").join(format!("{}.yaml", std::env::consts::OS))
+    };
+
+    let capture_config =
+        pll::config::read_deserializable::<pll::capture::Config>(&capture_config_path)?;
     let mut capture = pll::capture::CaptureGrabber::new(capture_config);
 
     capture.update_resolution();
