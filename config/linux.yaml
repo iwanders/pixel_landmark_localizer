@@ -1,0 +1,7 @@
+rate: 60.0
+
+capture:
+  -
+    match_width: 3840 # If the width of the desktop is 3840 pixels.
+    x: 1920 # Only match from 1920th pixel and onward (so right monitor).
+  - {} # If width is not 3840, we likely only have a single monitor and want to capture everything.

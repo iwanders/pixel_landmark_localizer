@@ -69,7 +69,7 @@ pub fn read_deserializable<T: DeserializeOwned>(path: &std::path::Path) -> Resul
     }
 }
 
-fn load_yaml<T: DeserializeOwned>(content: &str) -> Result<T, crate::Error> {
+pub fn load_yaml<T: DeserializeOwned>(content: &str) -> Result<T, crate::Error> {
     match serde_yaml::from_str(content) {
         Ok(parsed_config) => Ok(parsed_config),
         Err(failure_message) => Err(Box::new(failure_message)),

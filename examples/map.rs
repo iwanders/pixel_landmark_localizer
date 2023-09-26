@@ -42,16 +42,23 @@ pub fn main() -> Result<(), pixel_landmark_localizer::Error> {
     let mut localizer = localizer;
     let mut capture = pixel_landmark_localizer::get_configured_capture();
 
-    loop {
-        let res = capture.capture_image();
+    let capture_config = pll::config::read_deserializable::<pll::capture::Config>(
+        &std::path::PathBuf::from("config").join(format!("{}.yaml", std::env::consts::OS)),
+    )?;
+    let mut capture = pll::capture::CaptureGrabber::new(capture_config);
 
-        if !res {
+    capture.update_resolution();
+
+    loop {
+        let res = capture.capture();
+
+        if res.is_none() {
             std::thread::sleep(std::time::Duration::from_millis(100));
             continue;
         }
 
         // Then, we can grab the actual image.
-        let screenshot = capture.get_image();
+        let screenshot = res.unwrap();
 
         let start = std::time::Instant::now();
 
