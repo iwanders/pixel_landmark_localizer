@@ -51,9 +51,7 @@ impl<'a> image::GenericImageView for CaptureAdaptor<'a> {
     fn dimensions(&self) -> (u32, u32) {
         (self.width as u32, self.height as u32)
     }
-    fn bounds(&self) -> (u32, u32, u32, u32) {
-        (0, 0, self.width as u32, self.height as u32)
-    }
+
     fn get_pixel(&self, x: u32, y: u32) -> Self::Pixel {
         let rgb = self.buffer[y as usize * self.width + x as usize];
         let mut res = image::Rgba::<u8>::from([0; 4]);

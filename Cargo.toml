@@ -7,7 +7,7 @@ license = "BSD-3-Clause"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-image = { version = "0.24.6"}
+image = { version = "0.25.1", default-features=false, features=["png"]}
 
 screen_capture = { git = "https://github.com/iwanders/displaylight_rs", rev="525072ef5e280063542395e1ee2664b1f555d5d4" }
 
