@@ -10,7 +10,7 @@ Make landmarks by:
     6. Create template from the pixels that are selected.
 */
 
-pub type Error = Box<dyn std::error::Error>;
+pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
 pub mod capture;
 mod landmark;
