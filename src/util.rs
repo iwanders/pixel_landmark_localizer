@@ -1,4 +1,5 @@
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, Hash)]
+use serde::{Deserialize, Serialize};
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, Hash, Deserialize, Serialize)]
 pub struct Coordinate {
     pub x: i32,
     pub y: i32,
@@ -41,7 +42,7 @@ impl std::ops::Add<Coordinate> for Coordinate {
 }
 
 /// Struct to represent a rectangle.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct Rect {
     pub x: i32,
     pub y: i32,

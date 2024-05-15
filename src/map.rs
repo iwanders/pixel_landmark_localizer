@@ -1,9 +1,10 @@
 use crate::landmark::Landmark;
 use crate::util::Rect;
 use crate::Coordinate;
+use serde::{Deserialize, Serialize};
 
 /// Id for a particular landmark, (so the pattern).
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Deserialize, Serialize)]
 pub struct LandmarkId(usize);
 
 impl LandmarkId {
@@ -19,11 +20,11 @@ impl std::fmt::Display for LandmarkId {
 }
 
 /// Id for a particular location on the map, so landmark id & position.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Deserialize, Serialize)]
 pub struct LocationId(usize);
 
 /// The specified landmark at the provided location.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Deserialize, Serialize)]
 pub struct LandmarkLocation {
     /// The location of this landmark.
     pub location: Coordinate,

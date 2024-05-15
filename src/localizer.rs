@@ -5,6 +5,8 @@ use crate::Landmark;
 use crate::Rect;
 use image::Rgba;
 
+use serde::{Deserialize, Serialize};
+
 /// A struct to keep track of a location against a map.
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct Localizer {
@@ -15,11 +17,11 @@ pub struct Localizer {
 }
 
 /// Helper to make screen coordinates a distinct type.
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, Deserialize, Serialize)]
 pub struct ScreenCoordinate(pub Coordinate);
 
 /// Configuration for the localizer.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Deserialize, Serialize)]
 pub struct LocalizerConfig {
     /// Amount to search around the expected value. Width of the box searched is 2*search_box.
     pub search_box: u32,
