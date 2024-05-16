@@ -27,6 +27,7 @@ pub struct LandmarkSpecification {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 struct MapSpecification {
     pub name: Option<String>,
+    pub pixel_difference_threshold: Option<u16>,
     pub landmarks: Vec<String>,
     pub locations: Vec<(String, [i32; 2])>,
 }
@@ -46,6 +47,7 @@ impl MapSpecification {
             name,
             landmarks,
             locations,
+            pixel_difference_threshold: None,
         }
     }
 }
@@ -97,7 +99,10 @@ pub fn load_map(path: &std::path::Path) -> Result<crate::Map, crate::Error> {
             (spec, png_name)
         } else {
             (
-                LandmarkSpecification::default(),
+                LandmarkSpecification{
+                    pixel_difference_threshold: *map_spec.pixel_difference_threshold.as_ref().unwrap_or(&0),
+                    filename: None,
+                },
                 format!("{landmark_name}.png"),
             )
         };
