@@ -205,7 +205,7 @@ impl Localizer {
                 }
             }
         }
-        println!("Inserting: {to_insert:?}");
+        // println!("Inserting: {to_insert:?}");
 
         let mut v = vec![];
         for m in to_insert {
