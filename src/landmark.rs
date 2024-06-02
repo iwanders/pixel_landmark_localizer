@@ -31,7 +31,12 @@ impl Pixel {
 pub struct Landmark {
     pixels: Vec<Pixel>,
     name: Option<String>,
+    /// Amount of pixel values (combined rgb) that may be different between the landmark and the
+    /// image for the pixel to be determined not a match.
     pixel_difference_threshold: u16,
+    /// Number of mismatching pixels, that when exceeded result in the pixel landmark being declared
+    /// not present.
+    pixel_mismatch_threshold: u16,
     width: u32,
     height: u32,
 }
@@ -67,6 +72,7 @@ impl Landmark {
             pixels,
             name: None,
             pixel_difference_threshold,
+            pixel_mismatch_threshold: 0,
             width,
             height,
         }
@@ -93,9 +99,6 @@ impl Landmark {
         image
     }
 
-    pub fn set_pixel_difference_threshold(&mut self, value: u16) {
-        self.pixel_difference_threshold = value;
-    }
     pub fn set_name(&mut self, value: Option<String>) {
         self.name = value;
     }
@@ -110,13 +113,16 @@ impl Landmark {
         {
             return false;
         }
-
+        let mut mismatch_count = 0;
         for p in self.pixels.iter() {
             let x = position.0 + p.offset.0;
             let y = position.1 + p.offset.1;
             let pixel = img.get_pixel(x, y).to_rgb();
             let d = p.difference(&pixel);
             if d > self.pixel_difference_threshold {
+                mismatch_count += 1;
+            }
+            if mismatch_count > self.pixel_mismatch_threshold {
                 return false;
             }
         }
@@ -126,9 +132,23 @@ impl Landmark {
     pub fn pixels(&self) -> &[Pixel] {
         &self.pixels
     }
+
+    pub fn set_pixel_difference_threshold(&mut self, value: u16) {
+        self.pixel_difference_threshold = value;
+    }
+
     pub fn pixel_difference_threshold(&self) -> u16 {
         self.pixel_difference_threshold
     }
+
+    pub fn set_pixel_mismatch_threshold(&mut self, value: u16) {
+        self.pixel_mismatch_threshold = value;
+    }
+
+    pub fn pixel_mismatch_threshold(&self) -> u16 {
+        self.pixel_mismatch_threshold
+    }
+
     pub fn width(&self) -> u32 {
         self.width
     }
